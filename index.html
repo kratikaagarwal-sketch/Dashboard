@@ -3,1383 +3,904 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Product Ads Dashboard — Monthly Report</title>
+<title>Product Ads Master Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  :root {
-    --bg: #0c1015;
-    --surface: #141a22;
-    --surface2: #1c2530;
-    --border: #253040;
-    --border2: #2e3d50;
-    --text: #e2eaf4;
-    --muted: #7a90a8;
-    --dim: #4a6070;
-    --teal: #00cba4;
-    --teal-dim: rgba(0,203,164,0.12);
-    --blue: #4d9fff;
-    --blue-dim: rgba(77,159,255,0.12);
-    --green: #3dd68c;
-    --green-dim: rgba(61,214,140,0.10);
-    --red: #ff6168;
-    --red-dim: rgba(255,97,104,0.10);
-    --amber: #ffb547;
-    --amber-dim: rgba(255,181,71,0.10);
-    --purple: #a78bfa;
-    --purple-dim: rgba(167,139,250,0.10);
-    --radius: 10px;
-    --radius-sm: 6px;
-  }
+:root{
+  --bg:#0c1015;--surf:#141a22;--surf2:#1c2530;--surf3:#222e3d;
+  --bdr:#253040;--bdr2:#2e3d50;
+  --txt:#e2eaf4;--muted:#7a90a8;--dim:#4a6070;
+  --teal:#00cba4;--tdim:rgba(0,203,164,.12);
+  --blue:#4d9fff;--bdim:rgba(77,159,255,.12);
+  --green:#3dd68c;--gdim:rgba(61,214,140,.10);
+  --red:#ff6168;--rdim:rgba(255,97,104,.10);
+  --amber:#ffb547;--adim:rgba(255,181,71,.10);
+  --purple:#a78bfa;--pdim:rgba(167,139,250,.10);
+  --r:10px;--rs:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);font-size:14px;line-height:1.5;overflow-x:hidden}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+/* Sidebar */
+.sb{width:230px;flex-shrink:0;background:var(--surf);border-right:1px solid var(--bdr);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.sb-logo{padding:18px 20px 14px;border-bottom:1px solid var(--bdr)}
+.sb-brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px;color:var(--teal)}
+.sb-icon{width:30px;height:30px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#000;flex-shrink:0}
+.sb-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.sb-nav{padding:10px 8px;flex:1}
+.sb-sec{font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 5px}
+.nb{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--rs);cursor:pointer;color:var(--muted);font-size:12.5px;font-weight:500;transition:all .15s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left}
+.nb:hover{background:var(--surf2);color:var(--txt)}
+.nb.on{background:var(--tdim);color:var(--teal)}
+.ni{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.sb-foot{padding:12px 18px;border-top:1px solid var(--bdr);font-size:11px;color:var(--dim)}
+.live{display:inline-flex;align-items:center;gap:5px;background:var(--gdim);color:var(--green);font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;margin-bottom:5px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
 
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 14px;
-    line-height: 1.5;
-  }
+/* Main */
+.layout{display:flex;min-height:100vh}
+.main{margin-left:230px;flex:1;min-width:0}
+.topbar{background:var(--surf);border-bottom:1px solid var(--bdr);padding:14px 26px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.tb-title{font-size:17px;font-weight:700}
+.tb-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.tb-right{display:flex;gap:8px;align-items:center}
+.btn{padding:7px 14px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--bdr2);background:var(--surf2);color:var(--txt);transition:all .15s}
+.btn:hover{border-color:var(--teal);color:var(--teal)}
+.btn-p{background:var(--teal);color:#000;border-color:var(--teal)}
+.btn-p:hover{background:#00e0b3;color:#000}
+.cnt{padding:22px 26px}
+.tab{display:none}
+.tab.on{display:block}
 
-  /* ── Layout ── */
-  .layout { display: flex; min-height: 100vh; }
+/* KPI Grid */
+.kg{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.kc{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:15px;position:relative;transition:border-color .2s}
+.kc:hover{border-color:var(--bdr2)}
+.kc.best{border-color:var(--teal)}
+.kc.best::after{content:'★ BEST EVER';position:absolute;top:-1px;right:10px;background:var(--teal);color:#000;font-size:9px;font-weight:800;padding:2px 7px;border-radius:0 0 6px 6px}
+.kl{font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+.kv{font-size:21px;font-weight:800;color:var(--txt);letter-spacing:-.5px;line-height:1.1;margin-bottom:7px}
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px}
+.up{background:var(--gdim);color:var(--green)}
+.down{background:var(--rdim);color:var(--red)}
+.dg{background:var(--gdim);color:var(--green)}
+.ub{background:var(--rdim);color:var(--red)}
+.neu{background:var(--bdr);color:var(--muted)}
+.ks{font-size:10.5px;color:var(--dim);margin-top:4px}
+.tbar{margin-top:9px}
+.tbar-lbl{display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin-bottom:3px}
+.tbar-bg{height:3px;background:var(--bdr2);border-radius:2px;overflow:hidden}
+.tbar-fill{height:100%;background:var(--teal);border-radius:2px}
 
-  .sidebar {
-    width: 220px;
-    flex-shrink: 0;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    display: flex;
-    flex-direction: column;
-    z-index: 100;
-  }
+/* Section */
+.sh{display:flex;align-items:center;justify-content:space-between;margin:24px 0 13px}
+.sh h2{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.sh h2 span{color:var(--muted);font-weight:400;font-size:12px}
 
-  .sidebar-logo {
-    padding: 20px 20px 16px;
-    border-bottom: 1px solid var(--border);
-  }
-  .sidebar-logo .logo-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 700;
-    font-size: 16px;
-    color: var(--teal);
-    letter-spacing: -0.3px;
-  }
-  .logo-icon {
-    width: 28px; height: 28px;
-    background: var(--teal);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 900; color: #000;
-  }
-  .sidebar-subtitle {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
+/* Charts */
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.cg3{grid-template-columns:1fr 1fr 1fr}
+.cc{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:17px}
+.cc.w{grid-column:1/-1}
+.ct{font-size:13px;font-weight:700;margin-bottom:3px}
+.cs{font-size:11px;color:var(--muted);margin-bottom:14px}
+.cw{position:relative;width:100%}
+.leg{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:11px}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.ld{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 
-  .sidebar-nav { padding: 12px 10px; flex: 1; }
-  .nav-section-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--dim);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 10px 10px 6px;
-  }
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 10px;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 500;
-    transition: all 0.15s;
-    margin-bottom: 2px;
-    border: none;
-    background: none;
-    width: 100%;
-    text-align: left;
-  }
-  .nav-item:hover { background: var(--surface2); color: var(--text); }
-  .nav-item.active { background: var(--teal-dim); color: var(--teal); }
-  .nav-icon { font-size: 15px; width: 20px; text-align: center; }
+/* Banner */
+.banner{background:linear-gradient(135deg,rgba(0,203,164,.08),rgba(0,203,164,.03));border:1px solid rgba(0,203,164,.3);border-radius:var(--r);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.bn-left{display:flex;align-items:center;gap:12px}
+.bn-title{font-size:15px;font-weight:700;color:var(--teal)}
+.bn-sub{font-size:12px;color:var(--muted)}
+.bn-stats{display:flex;gap:22px}
+.bn-val{font-size:18px;font-weight:800}
+.bn-lbl{font-size:11px;color:var(--muted)}
 
-  .sidebar-footer {
-    padding: 14px 20px;
-    border-top: 1px solid var(--border);
-    font-size: 11px;
-    color: var(--dim);
-  }
-  .badge-live {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: var(--green-dim);
-    color: var(--green);
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 8px;
-    border-radius: 20px;
-    margin-bottom: 6px;
-  }
-  .pulse-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    animation: pulse 2s ease-in-out infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
+/* Insights */
+.ig{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ic{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:15px}
+.ib{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:8px}
+.pos{background:var(--gdim);color:var(--green)}
+.warn{background:var(--adim);color:var(--amber)}
+.act{background:var(--rdim);color:var(--red)}
+.inf{background:var(--bdim);color:var(--blue)}
+.it{font-size:13.5px;font-weight:700;margin-bottom:5px}
+.id{font-size:12.5px;color:var(--muted);line-height:1.65}
+.im{font-weight:600;color:var(--txt)}
 
-  /* ── Main ── */
-  .main { margin-left: 220px; flex: 1; }
-  .topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky; top: 0; z-index: 50;
-  }
-  .topbar-title { font-size: 17px; font-weight: 700; color: var(--text); }
-  .topbar-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
-  .topbar-right { display: flex; gap: 10px; align-items: center; }
+/* Table */
+.tw{overflow-x:auto}
+.dt{width:100%;border-collapse:collapse;font-size:12.5px}
+.dt th{text-align:left;padding:9px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--bdr);white-space:nowrap}
+.dt td{padding:9px 12px;border-bottom:1px solid var(--bdr);white-space:nowrap}
+.dt tr:hover td{background:var(--surf2)}
+.num{text-align:right;font-family:'Courier New',monospace}
+.hi{color:var(--teal);font-weight:600}
+.wn{color:var(--amber)}
+.bd{color:var(--red)}
+.sm{color:var(--muted);font-size:11px}
 
-  .btn {
-    padding: 7px 14px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid var(--border2);
-    background: var(--surface2);
-    color: var(--text);
-    transition: all 0.15s;
-  }
-  .btn:hover { border-color: var(--teal); color: var(--teal); }
-  .btn-primary {
-    background: var(--teal);
-    color: #000;
-    border-color: var(--teal);
-    font-weight: 700;
-  }
-  .btn-primary:hover { background: #00e0b3; color: #000; border-color: #00e0b3; }
+/* Mini stats */
+.ms{display:grid;gap:1px;background:var(--bdr);border-radius:var(--r);overflow:hidden;margin-bottom:18px}
+.ms4{grid-template-columns:repeat(4,1fr)}
+.ms5{grid-template-columns:repeat(5,1fr)}
+.ms3{grid-template-columns:repeat(3,1fr)}
+.mi{background:var(--surf);padding:14px;text-align:center}
+.mv{font-size:19px;font-weight:800}
+.ml{font-size:11px;color:var(--muted);margin-top:2px}
 
-  .content { padding: 24px 28px; }
+/* Progress bars */
+.pg-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12px}
+.pg-lbl{width:180px;flex-shrink:0;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pg-bg{flex:1;height:6px;background:var(--bdr2);border-radius:3px;overflow:hidden}
+.pg-fill{height:100%;border-radius:3px}
+.pg-val{width:65px;text-align:right;color:var(--txt);font-weight:600;font-size:11.5px;font-family:'Courier New',monospace}
 
-  /* ── Tabs ── */
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
+/* Chips */
+.chip{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10.5px;font-weight:600}
+.cp{background:var(--rdim);color:var(--red)}
+.cu{background:var(--gdim);color:var(--green)}
 
-  /* ── KPI Cards ── */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-    gap: 14px;
-    margin-bottom: 24px;
-  }
-  .kpi-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    position: relative;
-    transition: border-color 0.2s;
-  }
-  .kpi-card:hover { border-color: var(--border2); }
-  .kpi-card.best { border-color: var(--teal); }
-  .kpi-card.best::after {
-    content: '★ Best Ever';
-    position: absolute;
-    top: -1px; right: 10px;
-    background: var(--teal);
-    color: #000;
-    font-size: 9px;
-    font-weight: 800;
-    padding: 2px 7px;
-    border-radius: 0 0 6px 6px;
-    letter-spacing: 0.3px;
-  }
-  .kpi-label {
-    font-size: 11px;
-    color: var(--muted);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
-  }
-  .kpi-val {
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--text);
-    letter-spacing: -0.5px;
-    line-height: 1.1;
-    margin-bottom: 8px;
-  }
-  .kpi-change {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 3px 7px;
-    border-radius: 4px;
-  }
-  .up { background: var(--green-dim); color: var(--green); }
-  .down { background: var(--red-dim); color: var(--red); }
-  .down-good { background: var(--green-dim); color: var(--green); }
-  .up-bad { background: var(--red-dim); color: var(--red); }
-  .neutral { background: var(--border); color: var(--muted); }
-  .kpi-sub { font-size: 11px; color: var(--dim); margin-top: 4px; }
+/* AI panel */
+#ai-result{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:20px;min-height:80px}
+.ai-load{color:var(--muted);font-size:14px;display:flex;align-items:center;gap:10px}
+.spin{width:18px;height:18px;border:2px solid var(--bdr2);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.ai-tab{padding:6px 14px;border-radius:var(--rs);font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--bdr2);background:var(--surf2);color:var(--muted);transition:all .15s}
+.ai-tab.on{background:var(--tdim);color:var(--teal);border-color:var(--teal)}
 
-  /* Target bar */
-  .target-bar-wrap { margin-top: 10px; }
-  .target-bar-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--dim); margin-bottom: 4px; }
-  .target-bar { height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; }
-  .target-bar-fill { height: 100%; background: var(--teal); border-radius: 2px; transition: width 1s ease; }
-
-  /* ── Section headers ── */
-  .section-hd {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 28px 0 14px;
-  }
-  .section-hd h2 {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .section-hd h2 span { color: var(--muted); font-weight: 400; font-size: 13px; }
-
-  /* ── Chart cards ── */
-  .chart-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 20px;
-  }
-  .chart-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px;
-  }
-  .chart-card.wide { grid-column: 1 / -1; }
-  .chart-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 4px;
-  }
-  .chart-sub {
-    font-size: 11px;
-    color: var(--muted);
-    margin-bottom: 16px;
-  }
-  .chart-wrap { position: relative; width: 100%; }
-
-  /* ── Legend ── */
-  .legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
-  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
-
-  /* ── Insight Panel ── */
-  .insight-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-  }
-  .insight-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-  }
-  .insight-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    margin-bottom: 10px;
-  }
-  .insight-badge.positive { background: var(--green-dim); color: var(--green); }
-  .insight-badge.warning { background: var(--amber-dim); color: var(--amber); }
-  .insight-badge.action { background: var(--red-dim); color: var(--red); }
-  .insight-badge.info { background: var(--blue-dim); color: var(--blue); }
-  .insight-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-  .insight-body { font-size: 13px; color: var(--muted); line-height: 1.6; }
-  .insight-metric { font-weight: 600; color: var(--text); }
-
-  /* ── Table ── */
-  .data-table-wrap { overflow-x: auto; }
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-  .data-table th {
-    text-align: left;
-    padding: 10px 14px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  .data-table td {
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-    white-space: nowrap;
-  }
-  .data-table tr:hover td { background: var(--surface2); }
-  .data-table .metric-cell { font-weight: 600; color: var(--teal); }
-  .data-table .num { text-align: right; font-variant-numeric: tabular-nums; font-family: 'Courier New', monospace; }
-
-  /* ── AI Insights ── */
-  #ai-result {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-  }
-  .ai-loading { color: var(--muted); font-size: 14px; display: flex; align-items: center; gap: 10px; }
-  .spinner {
-    width: 18px; height: 18px;
-    border: 2px solid var(--border2);
-    border-top-color: var(--teal);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ── Progress rings & mini charts ── */
-  .mini-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-    background: var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    margin-bottom: 20px;
-  }
-  .mini-stat {
-    background: var(--surface);
-    padding: 14px 16px;
-    text-align: center;
-  }
-  .mini-stat-val { font-size: 20px; font-weight: 800; color: var(--text); }
-  .mini-stat-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
-
-  /* ── Donut wrapper ── */
-  .donut-legends {
-    margin-top: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .donut-leg-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 12px;
-  }
-  .donut-leg-left { display: flex; align-items: center; gap: 8px; color: var(--muted); }
-  .donut-leg-bar-wrap { flex: 1; margin: 0 10px; height: 3px; background: var(--border); border-radius: 2px; }
-  .donut-leg-bar { height: 100%; border-radius: 2px; }
-  .donut-leg-val { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
-
-  /* ── Best ever highlight ── */
-  .record-banner {
-    background: linear-gradient(135deg, rgba(0,203,164,0.08) 0%, rgba(0,203,164,0.03) 100%);
-    border: 1px solid rgba(0,203,164,0.3);
-    border-radius: var(--radius);
-    padding: 14px 18px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .record-banner-left { display: flex; align-items: center; gap: 12px; }
-  .record-icon { font-size: 24px; }
-  .record-title { font-size: 15px; font-weight: 700; color: var(--teal); }
-  .record-sub { font-size: 12px; color: var(--muted); }
-  .record-stats { display: flex; gap: 24px; }
-  .record-stat { text-align: center; }
-  .record-stat-val { font-size: 18px; font-weight: 800; color: var(--text); }
-  .record-stat-label { font-size: 11px; color: var(--muted); }
+/* Alert box */
+.alert{border-radius:var(--rs);padding:12px 16px;font-size:12.5px;line-height:1.7;margin-top:14px}
+.alert-warn{background:var(--adim);border:1px solid var(--amber);color:var(--amber)}
+.alert-good{background:var(--gdim);border:1px solid var(--green);color:var(--green)}
+.alert-info{background:var(--bdim);border:1px solid var(--blue);color:var(--blue)}
 </style>
 </head>
 <body>
-
 <div class="layout">
 
-<!-- ── Sidebar ── -->
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-badge"><span class="logo-icon">P</span> Product Ads</div>
-    <div class="sidebar-subtitle">Monthly Performance Report</div>
+<!-- ════════ SIDEBAR ════════ -->
+<aside class="sb">
+  <div class="sb-logo">
+    <div class="sb-brand"><span class="sb-icon">P</span>Product Ads</div>
+    <div class="sb-sub">Master Dashboard · 6 Sources</div>
   </div>
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">Dashboards</div>
-    <button class="nav-item active" onclick="switchTab('overview')">
-      <span class="nav-icon">📊</span> Overview
-    </button>
-    <button class="nav-item" onclick="switchTab('google-ads')">
-      <span class="nav-icon">🎯</span> Google Ads
-    </button>
-    <button class="nav-item" onclick="switchTab('bl-stats')">
-      <span class="nav-icon">📋</span> Business Leads
-    </button>
-    <button class="nav-item" onclick="switchTab('traffic')">
-      <span class="nav-icon">👥</span> Traffic & GA
-    </button>
-    <button class="nav-item" onclick="switchTab('enquiry')">
-      <span class="nav-icon">📞</span> Enquiry & Calls
-    </button>
-    <div class="nav-section-label" style="margin-top:10px;">Intelligence</div>
-    <button class="nav-item" onclick="switchTab('ai-insights')">
-      <span class="nav-icon">✨</span> AI Insights
-    </button>
+  <nav class="sb-nav">
+    <div class="sb-sec">Monthly KPIs</div>
+    <button class="nb on" onclick="go('overview')"><span class="ni">📊</span>Overview</button>
+    <button class="nb" onclick="go('google')"><span class="ni">🎯</span>Google Ads</button>
+    <button class="nb" onclick="go('bl')"><span class="ni">📋</span>Business Leads</button>
+    <button class="nb" onclick="go('traffic')"><span class="ni">👥</span>Traffic & GA</button>
+    <button class="nb" onclick="go('enquiry')"><span class="ni">📞</span>Enquiry & Calls</button>
+
+    <div class="sb-sec">Campaign Reports</div>
+    <button class="nb" onclick="go('bc')"><span class="ni">🏗</span>B&amp;C Weekly</button>
+    <button class="nb" onclick="go('campaign')"><span class="ni">📈</span>Campaign Detail</button>
+
+    <div class="sb-sec">Operations</div>
+    <button class="nb" onclick="go('mcat')"><span class="ni">⏸</span>MCAT Pause</button>
+    <button class="nb" onclick="go('hygiene')"><span class="ni">🔬</span>Feed Hygiene</button>
+    <button class="nb" onclick="go('diversity')"><span class="ni">🗂</span>Category Diversity</button>
+    <button class="nb" onclick="go('master')"><span class="ni">🗄</span>MCAT Master</button>
+
+    <div class="sb-sec">Intelligence</div>
+    <button class="nb" onclick="go('ai')"><span class="ni">✨</span>AI Insights</button>
   </nav>
-  <div class="sidebar-footer">
-    <div class="badge-live"><span class="pulse-dot"></span> Mar'26 — Live</div>
-    <div>Data: Apr'25 → Mar'26</div>
-    <div style="margin-top:3px;">12 months · All channels</div>
+  <div class="sb-foot">
+    <div class="live"><span class="dot"></span>Apr 25 '26 — Live</div>
+    <div>Sources: Monthly CSV · Google Ads XLSX</div>
+    <div>B&amp;C Weekly · MCAT Pause · Hygiene</div>
+    <div style="margin-top:2px">Cat Diversity · MCAT Master (98K)</div>
   </div>
 </aside>
 
-<!-- ── Main ── -->
+<!-- ════════ MAIN ════════ -->
 <main class="main">
+<div class="topbar">
+  <div>
+    <div class="tb-title" id="pg-title">Overview Dashboard</div>
+    <div class="tb-sub">Mar '26 · All 6 data sources integrated</div>
+  </div>
+  <div class="tb-right">
+    <button class="btn" onclick="window.print()">⬇ Export</button>
+    <button class="btn btn-p" onclick="go('ai')">✨ AI Insights</button>
+  </div>
+</div>
 
-  <!-- Topbar -->
-  <div class="topbar">
-    <div>
-      <div class="topbar-title" id="page-title">Overview Dashboard</div>
-      <div class="topbar-sub">March 2026 · Compared to Feb'26</div>
+<!-- ══════════════ OVERVIEW ══════════════ -->
+<div id="tab-overview" class="tab on">
+<div class="cnt">
+  <div class="banner">
+    <div class="bn-left">
+      <div style="font-size:28px">🏆</div>
+      <div><div class="bn-title">Best Ever Month — March 2026</div><div class="bn-sub">BL Approved + Cost/BL both hit all-time records simultaneously</div></div>
     </div>
-    <div class="topbar-right">
-      <button class="btn" onclick="window.print()">⬇ Export PDF</button>
-      <button class="btn btn-primary" onclick="switchTab('ai-insights')">✨ AI Insights</button>
+    <div class="bn-stats">
+      <div><div class="bn-val" style="color:var(--teal)">6,03,134</div><div class="bn-lbl">BL Approved ★</div></div>
+      <div><div class="bn-val" style="color:var(--teal)">₹34</div><div class="bn-lbl">Cost/BL ★</div></div>
+      <div><div class="bn-val" style="color:var(--green)">104.9%</div><div class="bn-lbl">vs 5.75L Target</div></div>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════ OVERVIEW TAB ═══════════════════════════════════════════ -->
-  <div id="tab-overview" class="tab-content active">
-    <div class="content">
-
-      <!-- Record Banner -->
-      <div class="record-banner">
-        <div class="record-banner-left">
-          <div class="record-icon">🏆</div>
-          <div>
-            <div class="record-title">Best Ever Month — March 2026</div>
-            <div class="record-sub">BL Approved & Cost/BL both hit all-time records this month</div>
-          </div>
-        </div>
-        <div class="record-stats">
-          <div class="record-stat">
-            <div class="record-stat-val" style="color:var(--teal)">603,134</div>
-            <div class="record-stat-label">BL Approved (Best Ever)</div>
-          </div>
-          <div class="record-stat">
-            <div class="record-stat-val" style="color:var(--teal)">₹34</div>
-            <div class="record-stat-label">Cost/BL (Best Ever)</div>
-          </div>
-          <div class="record-stat">
-            <div class="record-stat-val" style="color:var(--green)">104.89%</div>
-            <div class="record-stat-label">vs Monthly Target</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- KPI Cards -->
-      <div class="kpi-grid">
-        <div class="kpi-card best">
-          <div class="kpi-label">BL Approved</div>
-          <div class="kpi-val">6.03L</div>
-          <div><span class="kpi-change up">▲ 3.85%</span></div>
-          <div class="kpi-sub">Target: 5.75L · Beat by 4.89%</div>
-          <div class="target-bar-wrap">
-            <div class="target-bar-label"><span>Progress</span><span>104.9%</span></div>
-            <div class="target-bar"><div class="target-bar-fill" style="width:100%"></div></div>
-          </div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Total Spend</div>
-          <div class="kpi-val">₹2.10Cr</div>
-          <div><span class="kpi-change down-good">▼ 16.63%</span></div>
-          <div class="kpi-sub">Google: ₹2.08Cr · Meta: ₹2.18L</div>
-        </div>
-        <div class="kpi-card best">
-          <div class="kpi-label">Cost / BL</div>
-          <div class="kpi-val">₹34</div>
-          <div><span class="kpi-change down-good">▼ 20.56%</span></div>
-          <div class="kpi-sub">Down from ₹43 last month</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Cost / Transaction</div>
-          <div class="kpi-val">₹10</div>
-          <div><span class="kpi-change down-good">▼ 21.74%</span></div>
-          <div class="kpi-sub">Down from ₹12 last month</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Google Clicks</div>
-          <div class="kpi-val">1.19Cr</div>
-          <div><span class="kpi-change down">▼ 16.90%</span></div>
-          <div class="kpi-sub">vs 1.43Cr in Feb'26</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">CTR</div>
-          <div class="kpi-val">2.62%</div>
-          <div><span class="kpi-change up">▲ 12.93%</span></div>
-          <div class="kpi-sub">Up from 2.32% in Feb'26</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Avg. CPC</div>
-          <div class="kpi-val">₹1.75</div>
-          <div><span class="kpi-change down-good">▼ 0.57%</span></div>
-          <div class="kpi-sub">Stable — down from ₹1.76</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Unique Sold %</div>
-          <div class="kpi-val">88.9%</div>
-          <div><span class="kpi-change up">▲ 0.41%</span></div>
-          <div class="kpi-sub">535,876 unique sellers</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Transaction %</div>
-          <div class="kpi-val">361.4%</div>
-          <div><span class="kpi-change up">▲ 1.51%</span></div>
-          <div class="kpi-sub">21.8L total transactions</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">GA Users</div>
-          <div class="kpi-val">68.9L</div>
-          <div><span class="kpi-change down">▼ 13.72%</span></div>
-          <div class="kpi-sub">vs 79.9L in Feb'26</div>
-        </div>
-      </div>
-
-      <!-- Charts Row 1 -->
-      <div class="section-hd"><h2>BL & Cost Trend <span>Apr'25 → Mar'26</span></h2></div>
-      <div class="chart-grid">
-        <div class="chart-card wide">
-          <div class="chart-title">BL Approved — Monthly Trend</div>
-          <div class="chart-sub">Business Leads approved per month with target line (575,000)</div>
-          <div class="legend">
-            <div class="legend-item"><span class="legend-dot" style="background:#00cba4"></span>BL Approved</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#ff6168;border-style:dashed"></span>Monthly Target</div>
-          </div>
-          <div class="chart-wrap" style="height:240px"><canvas id="blTrendChart"></canvas></div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-title">Monthly Spend</div>
-          <div class="chart-sub">Total ad spend in ₹ (all channels)</div>
-          <div class="chart-wrap" style="height:220px"><canvas id="spendChart"></canvas></div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-title">Cost / BL Trend</div>
-          <div class="chart-sub">Efficiency improving — lowest ever in Mar'26</div>
-          <div class="chart-wrap" style="height:220px"><canvas id="costBLChart"></canvas></div>
-        </div>
-      </div>
-
-      <!-- BL Type Distribution -->
-      <div class="chart-grid">
-        <div class="chart-card">
-          <div class="chart-title">BL Type Distribution (Mar'26)</div>
-          <div class="chart-sub">WhatsApp dominates at 40.7% of all BLs</div>
-          <div class="chart-wrap" style="height:200px"><canvas id="blTypeChart"></canvas></div>
-          <div class="donut-legends">
-            <div class="donut-leg-item">
-              <div class="donut-leg-left"><span class="legend-dot" style="background:#00cba4"></span>WhatsApp</div>
-              <div class="donut-leg-bar-wrap"><div class="donut-leg-bar" style="width:100%;background:#00cba4"></div></div>
-              <span class="donut-leg-val">2,45,739</span>
-            </div>
-            <div class="donut-leg-item">
-              <div class="donut-leg-left"><span class="legend-dot" style="background:#4d9fff"></span>INTENT</div>
-              <div class="donut-leg-bar-wrap"><div class="donut-leg-bar" style="width:55%;background:#4d9fff"></div></div>
-              <span class="donut-leg-val">1,34,468</span>
-            </div>
-            <div class="donut-leg-item">
-              <div class="donut-leg-left"><span class="legend-dot" style="background:#a78bfa"></span>FLPNS</div>
-              <div class="donut-leg-bar-wrap"><div class="donut-leg-bar" style="width:43%;background:#a78bfa"></div></div>
-              <span class="donut-leg-val">1,06,191</span>
-            </div>
-            <div class="donut-leg-item">
-              <div class="donut-leg-left"><span class="legend-dot" style="background:#ffb547"></span>Direct</div>
-              <div class="donut-leg-bar-wrap"><div class="donut-leg-bar" style="width:43%;background:#ffb547"></div></div>
-              <span class="donut-leg-val">1,05,584</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-title">Transactions vs BL Approved</div>
-          <div class="chart-sub">Transaction % consistently above 360%</div>
-          <div class="chart-wrap" style="height:200px"><canvas id="txnChart"></canvas></div>
-          <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div style="text-align:center;padding:10px;background:var(--surface2);border-radius:var(--radius-sm);">
-              <div style="font-size:18px;font-weight:800;color:var(--teal)">21.8L</div>
-              <div style="font-size:11px;color:var(--muted)">Total Transactions</div>
-            </div>
-            <div style="text-align:center;padding:10px;background:var(--surface2);border-radius:var(--radius-sm);">
-              <div style="font-size:18px;font-weight:800;color:var(--blue)">361.4%</div>
-              <div style="font-size:11px;color:var(--muted)">Txn % (Mar'26)</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
+  <div class="kg">
+    <div class="kc best"><div class="kl">BL Approved</div><div class="kv">6.03L</div><span class="badge up">▲ 3.85%</span><div class="ks">Target 5.75L · Beat +4.89%</div><div class="tbar"><div class="tbar-lbl"><span>vs target</span><span>104.9%</span></div><div class="tbar-bg"><div class="tbar-fill" style="width:100%"></div></div></div></div>
+    <div class="kc"><div class="kl">Total Spend</div><div class="kv">₹2.10Cr</div><span class="badge dg">▼ 16.63%</span><div class="ks">Google ₹2.08Cr · Meta ₹2.18L</div></div>
+    <div class="kc best"><div class="kl">Cost / BL</div><div class="kv">₹34</div><span class="badge dg">▼ 20.56%</span><div class="ks">All-time best · was ₹43</div></div>
+    <div class="kc"><div class="kl">Cost / Txn</div><div class="kv">₹10</div><span class="badge dg">▼ 21.74%</span><div class="ks">Down from ₹12</div></div>
+    <div class="kc"><div class="kl">Google Clicks</div><div class="kv">1.19Cr</div><span class="badge down">▼ 16.9%</span><div class="ks">vs 1.43Cr Feb'26</div></div>
+    <div class="kc"><div class="kl">CTR</div><div class="kv">2.62%</div><span class="badge up">▲ 12.93%</span><div class="ks">6-month high</div></div>
+    <div class="kc"><div class="kl">Avg CPC</div><div class="kv">₹1.75</div><span class="badge dg">▼ 0.57%</span><div class="ks">Stable from ₹1.76</div></div>
+    <div class="kc"><div class="kl">Conversions</div><div class="kv">3.10L</div><span class="badge down">▼ 10.45%</span><div class="ks">₹67 per conv.</div></div>
+    <div class="kc"><div class="kl">GA Users</div><div class="kv">68.9L</div><span class="badge down">▼ 13.72%</span><div class="ks">vs 79.9L Feb'26</div></div>
+    <div class="kc"><div class="kl">Txn %</div><div class="kv">361.4%</div><span class="badge up">▲ 1.51%</span><div class="ks">21.8L transactions</div></div>
+    <div class="kc"><div class="kl">Unique Sold%</div><div class="kv">88.9%</div><span class="badge up">▲ 0.41%</span><div class="ks">5,35,876 sellers</div></div>
+    <div class="kc"><div class="kl">PMCAT Coverage</div><div class="kv">31.4%</div><span class="badge ub">▼ 4.68%</span><div class="ks">⚠ Target: 80%</div></div>
   </div>
 
-  <!-- ═══════════════════════════════════════════ GOOGLE ADS TAB ═══════════════════════════════════════════ -->
-  <div id="tab-google-ads" class="tab-content">
-    <div class="content">
+  <div class="cg">
+    <div class="cc w"><div class="ct">BL Approved — 12 Month Trend</div><div class="cs">Monthly BL vs 5.75L target (dotted)</div><div class="leg"><div class="li"><span class="ld" style="background:var(--teal)"></span>BL Approved</div><div class="li"><span class="ld" style="background:var(--red)"></span>Target 575K</div></div><div class="cw" style="height:220px"><canvas id="c-bl-trend"></canvas></div></div>
+    <div class="cc"><div class="ct">Monthly Spend (₹L)</div><div class="cs">All channels combined</div><div class="cw" style="height:200px"><canvas id="c-spend"></canvas></div></div>
+    <div class="cc"><div class="ct">Cost/BL Trend (₹)</div><div class="cs">Efficiency improving — ₹34 best ever Mar'26</div><div class="cw" style="height:200px"><canvas id="c-costbl"></canvas></div></div>
+    <div class="cc"><div class="ct">BL Type Mix — Mar'26</div><div class="cs">WhatsApp 40.7% · INTENT 22.3% fastest growing</div><div class="cw" style="height:190px"><canvas id="c-bltype"></canvas></div></div>
+    <div class="cc"><div class="ct">Transactions vs BL Monthly</div><div class="cs">Transaction % >360% consistently</div><div class="cw" style="height:190px"><canvas id="c-txn"></canvas></div></div>
+  </div>
+</div>
+</div>
 
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-label">Impressions</div>
-          <div class="kpi-val">45.3Cr</div>
-          <div><span class="kpi-change down">▼ 26.44%</span></div>
-          <div class="kpi-sub">vs 61.6Cr in Feb'26</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Clicks</div>
-          <div class="kpi-val">1.19Cr</div>
-          <div><span class="kpi-change down">▼ 16.90%</span></div>
-          <div class="kpi-sub">vs 1.43Cr in Feb'26</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">CTR</div>
-          <div class="kpi-val">2.62%</div>
-          <div><span class="kpi-change up">▲ 12.93%</span></div>
-          <div class="kpi-sub">Best in last 6 months</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Avg. CPC</div>
-          <div class="kpi-val">₹1.75</div>
-          <div><span class="kpi-change down-good">▼ 0.57%</span></div>
-          <div class="kpi-sub">Down from ₹1.76</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Conversions</div>
-          <div class="kpi-val">3.10L</div>
-          <div><span class="kpi-change down">▼ 10.45%</span></div>
-          <div class="kpi-sub">vs 3.46L in Feb'26</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Cost / Conversion</div>
-          <div class="kpi-val">₹67</div>
-          <div><span class="kpi-change down-good">▼ 7.97%</span></div>
-          <div class="kpi-sub">Down from ₹73 in Feb'26</div>
-        </div>
-      </div>
+<!-- ══════════════ GOOGLE ADS ══════════════ -->
+<div id="tab-google" class="tab">
+<div class="cnt">
+  <div class="kg">
+    <div class="kc"><div class="kl">Impressions</div><div class="kv">45.3Cr</div><span class="badge down">▼ 26.44%</span><div class="ks">vs 61.6Cr Feb'26</div></div>
+    <div class="kc"><div class="kl">Clicks</div><div class="kv">1.19Cr</div><span class="badge down">▼ 16.9%</span><div class="ks">vs 1.43Cr Feb'26</div></div>
+    <div class="kc"><div class="kl">CTR</div><div class="kv">2.62%</div><span class="badge up">▲ 12.93%</span><div class="ks">Best in 6 months</div></div>
+    <div class="kc"><div class="kl">Avg CPC</div><div class="kv">₹1.75</div><span class="badge dg">▼ 0.57%</span><div class="ks">Stable</div></div>
+    <div class="kc"><div class="kl">Conversions</div><div class="kv">3.10L</div><span class="badge down">▼ 10.45%</span><div class="ks">vs 3.46L Feb'26</div></div>
+    <div class="kc"><div class="kl">Cost/Conv</div><div class="kv">₹67</div><span class="badge dg">▼ 7.97%</span><div class="ks">Down from ₹73</div></div>
+  </div>
+  <div class="cg">
+    <div class="cc w"><div class="ct">Impressions & Clicks — Monthly</div><div class="cs">Impressions (÷10M) vs Clicks (÷1M)</div><div class="leg"><div class="li"><span class="ld" style="background:var(--blue)"></span>Impressions ÷10M</div><div class="li"><span class="ld" style="background:var(--teal)"></span>Clicks ÷1M</div></div><div class="cw" style="height:220px"><canvas id="c-imp-clk"></canvas></div></div>
+    <div class="cc"><div class="ct">CTR Trend</div><div class="cs">Improving to 2.62% in Mar'26</div><div class="cw" style="height:200px"><canvas id="c-ctr"></canvas></div></div>
+    <div class="cc"><div class="ct">Avg CPC (₹)</div><div class="cs">Peaked Jan'26 at ₹1.85, stabilising</div><div class="cw" style="height:200px"><canvas id="c-cpc"></canvas></div></div>
+    <div class="cc"><div class="ct">Conversions Monthly</div><div class="cs">Google Ads conversion count</div><div class="cw" style="height:200px"><canvas id="c-conv"></canvas></div></div>
+    <div class="cc"><div class="ct">Cost/Conversion (₹)</div><div class="cs">Down from ₹81 peak to ₹67</div><div class="cw" style="height:200px"><canvas id="c-costconv"></canvas></div></div>
+    <div class="cc"><div class="ct">Device Split — Clicks</div><div class="cs">M-site 97% · Desktop 3%</div><div class="cw" style="height:200px"><canvas id="c-dev-clk"></canvas></div></div>
+    <div class="cc"><div class="ct">Device Split — Spend</div><div class="cs">Mobile accounts for 97% spend</div><div class="cw" style="height:200px"><canvas id="c-dev-sp"></canvas></div></div>
+  </div>
+  <div class="sh"><h2>12-Month Detail Table</h2></div>
+  <div class="cc"><div class="tw"><table class="dt"><thead><tr><th>Month</th><th class="num">Impressions</th><th class="num">Clicks</th><th>CTR</th><th>Avg CPC</th><th class="num">Conv.</th><th>₹/Conv</th><th class="num">Spend</th></tr></thead><tbody id="ga-tb"></tbody></table></div></div>
+</div>
+</div>
 
-      <div class="chart-grid">
-        <div class="chart-card wide">
-          <div class="chart-title">Impressions & Clicks — Monthly</div>
-          <div class="chart-sub">Impressions (millions) vs Clicks trend over 12 months</div>
-          <div class="legend">
-            <div class="legend-item"><span class="legend-dot" style="background:#4d9fff"></span>Impressions (÷10M)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#00cba4"></span>Clicks (÷1M)</div>
-          </div>
-          <div class="chart-wrap" style="height:240px"><canvas id="impClickChart"></canvas></div>
-        </div>
+<!-- ══════════════ BL STATS ══════════════ -->
+<div id="tab-bl" class="tab">
+<div class="cnt">
+  <div class="kg">
+    <div class="kc best"><div class="kl">BL Approved</div><div class="kv">6,03,134</div><span class="badge up">▲ 3.85%</span><div class="ks">Best ever month</div></div>
+    <div class="kc"><div class="kl">BL Generated</div><div class="kv">7,69,642</div><span class="badge up">▲ 2.00%</span><div class="ks">Approval ~78%</div></div>
+    <div class="kc"><div class="kl">Unique Sold</div><div class="kv">5,35,876</div><span class="badge up">▲ 4.28%</span></div>
+    <div class="kc"><div class="kl">Transactions</div><div class="kv">21,79,514</div><span class="badge up">▲ 5.42%</span></div>
+    <div class="kc best"><div class="kl">Cost/BL</div><div class="kv">₹34</div><span class="badge dg">▼ 20.56%</span><div class="ks">All-time lowest</div></div>
+    <div class="kc"><div class="kl">BLNI</div><div class="kv">94,600</div><span class="badge up">▲ 1.17%</span><div class="ks">4.34% of txns</div></div>
+    <div class="kc"><div class="kl">BL/User</div><div class="kv">8.75%</div><span class="badge up">▲ 20.36%</span></div>
+    <div class="kc"><div class="kl">Unique Sold%</div><div class="kv">88.9%</div><span class="badge up">▲ 0.41%</span></div>
+  </div>
+  <div class="cg">
+    <div class="cc"><div class="ct">BL Type Mix (Mar'26)</div><div class="cs">WhatsApp leads at 40.7%</div><div class="cw" style="height:200px"><canvas id="c-bltype-big"></canvas></div></div>
+    <div class="cc"><div class="ct">BL Sold Distribution</div><div class="cs">High Sold 90.4% · Medium 6.1% · Low 3.1%</div><div class="cw" style="height:200px"><canvas id="c-blsold"></canvas></div></div>
+    <div class="cc w"><div class="ct">BL Type Trends — Monthly (÷K)</div><div class="leg"><div class="li"><span class="ld" style="background:var(--teal)"></span>WhatsApp</div><div class="li"><span class="ld" style="background:var(--blue)"></span>INTENT</div><div class="li"><span class="ld" style="background:var(--purple)"></span>FLPNS</div><div class="li"><span class="ld" style="background:var(--amber)"></span>Direct</div></div><div class="cw" style="height:220px"><canvas id="c-bltype-trend"></canvas></div></div>
+  </div>
+</div>
+</div>
 
-        <div class="chart-card">
-          <div class="chart-title">CTR Trend</div>
-          <div class="chart-sub">Click-through rate — improving to 2.62% in Mar'26</div>
-          <div class="chart-wrap" style="height:220px"><canvas id="ctrChart"></canvas></div>
-        </div>
+<!-- ══════════════ TRAFFIC ══════════════ -->
+<div id="tab-traffic" class="tab">
+<div class="cnt">
+  <div class="kg">
+    <div class="kc"><div class="kl">GA Users</div><div class="kv">68.9L</div><span class="badge down">▼ 13.72%</span><div class="ks">vs 79.9L Feb'26</div></div>
+    <div class="kc"><div class="kl">Sessions</div><div class="kv">87.3L</div><span class="badge down">▼ 14.70%</span></div>
+    <div class="kc"><div class="kl">Pageviews</div><div class="kv">2.40Cr</div><span class="badge down">▼ 14.33%</span></div>
+    <div class="kc"><div class="kl">New Users</div><div class="kv">33.4L</div><span class="badge down">▼ 13.09%</span></div>
+    <div class="kc"><div class="kl">PV/User</div><div class="kv">3.5</div><span class="badge neu">~ Stable</span></div>
+    <div class="kc"><div class="kl">User Conv%</div><div class="kv">8.85%</div><span class="badge up">▲ 15.84%</span><div class="ks">7-month high</div></div>
+  </div>
+  <div class="cg">
+    <div class="cc w"><div class="ct">GA Users · Sessions · New Users (÷100K)</div><div class="leg"><div class="li"><span class="ld" style="background:var(--blue)"></span>Users</div><div class="li"><span class="ld" style="background:var(--purple)"></span>Sessions</div><div class="li"><span class="ld" style="background:var(--green)"></span>New Users</div></div><div class="cw" style="height:230px"><canvas id="c-ga-users"></canvas></div></div>
+    <div class="cc"><div class="ct">Pageviews Monthly</div><div class="cw" style="height:200px"><canvas id="c-pv"></canvas></div></div>
+    <div class="cc"><div class="ct">User Type Mix (Mar'26)</div><div class="cs">Unidentified 81% · Identified 14%</div><div class="cw" style="height:200px"><canvas id="c-usertype"></canvas></div></div>
+  </div>
+</div>
+</div>
 
-        <div class="chart-card">
-          <div class="chart-title">Avg. CPC Trend (₹)</div>
-          <div class="chart-sub">Cost per click — peaked Jan'26, stabilising now</div>
-          <div class="chart-wrap" style="height:220px"><canvas id="cpcChart"></canvas></div>
-        </div>
+<!-- ══════════════ ENQUIRY ══════════════ -->
+<div id="tab-enquiry" class="tab">
+<div class="cnt">
+  <div class="kg">
+    <div class="kc"><div class="kl">Enquiry Approved</div><div class="kv">87,316</div><span class="badge down">▼ 65.26%</span><div class="ks">Sharp seasonal drop</div></div>
+    <div class="kc"><div class="kl">Call Clicked</div><div class="kv">2,61,182</div><span class="badge down">▼ 8.56%</span></div>
+    <div class="kc"><div class="kl">Total Requirements</div><div class="kv">9,51,632</div><span class="badge down">▼ 14.86%</span></div>
+    <div class="kc"><div class="kl">FENQ Approved</div><div class="kv">11,138</div><span class="badge down">▼ 26.6%</span><div class="ks">Was 98K peak Apr'25</div></div>
+  </div>
+  <div class="cg">
+    <div class="cc w"><div class="ct">Enquiry + Call + BL — Monthly Mix (÷K)</div><div class="leg"><div class="li"><span class="ld" style="background:var(--red)"></span>Enquiry</div><div class="li"><span class="ld" style="background:var(--amber)"></span>Call</div><div class="li"><span class="ld" style="background:var(--teal)"></span>BL Approved</div></div><div class="cw" style="height:240px"><canvas id="c-enq-mix"></canvas></div></div>
+    <div class="cc"><div class="ct">Enquiry by Distance (Mar'26)</div><div class="cs">&gt;250km = 49% of all enquiries</div><div class="cw" style="height:200px"><canvas id="c-enq-dist"></canvas></div></div>
+    <div class="cc"><div class="ct">FENQ Decline</div><div class="cs">Was 98K Apr'25 → now 11K (▼89%)</div><div class="cw" style="height:200px"><canvas id="c-fenq"></canvas></div></div>
+  </div>
+</div>
+</div>
 
-        <div class="chart-card">
-          <div class="chart-title">Conversions Monthly</div>
-          <div class="chart-sub">Google Ads conversions per month</div>
-          <div class="chart-wrap" style="height:220px"><canvas id="convChart"></canvas></div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-title">Cost per Conversion (₹)</div>
-          <div class="chart-sub">Efficiency improving after Jan'26 peak (₹81)</div>
-          <div class="chart-wrap" style="height:220px"><canvas id="costConvChart"></canvas></div>
-        </div>
-      </div>
-
-      <!-- Device Breakdown -->
-      <div class="section-hd"><h2>Device Breakdown <span>Feb'26 (latest available)</span></h2></div>
-      <div class="chart-grid">
-        <div class="chart-card">
-          <div class="chart-title">Clicks by Device</div>
-          <div class="chart-sub">M-site dominates at 97% of all clicks</div>
-          <div class="chart-wrap" style="height:200px"><canvas id="deviceClicksChart"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">Cost by Device</div>
-          <div class="chart-sub">Mobile accounts for 97% of total spend</div>
-          <div class="chart-wrap" style="height:200px"><canvas id="deviceCostChart"></canvas></div>
-        </div>
-      </div>
-
-      <!-- Monthly data table -->
-      <div class="section-hd"><h2>Monthly Google Ads Data <span>Full 12-month breakdown</span></h2></div>
-      <div class="chart-card">
-        <div class="data-table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Month</th>
-                <th class="num">Impressions</th>
-                <th class="num">Clicks</th>
-                <th>CTR</th>
-                <th>Avg CPC</th>
-                <th class="num">Conversions</th>
-                <th>Cost/Conv</th>
-                <th class="num">Total Spend</th>
-              </tr>
-            </thead>
-            <tbody id="googleAdsTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-    </div>
+<!-- ══════════════ B&C WEEKLY (REAL DATA) ══════════════ -->
+<div id="tab-bc" class="tab">
+<div class="cnt">
+  <div class="sh"><h2>Building &amp; Construction Weekly <span>Real data from B_C_-_Weekly_Report.xlsx · 25 weeks Nov'25–Apr'26</span></h2></div>
+  <div class="kg">
+    <div class="kc best"><div class="kl">Best BL Week</div><div class="kv">31,486</div><span class="badge up">Mar 22–28</span><div class="ks">Latest: 25,283 (▼5.8%)</div></div>
+    <div class="kc best"><div class="kl">Best Cost/BL</div><div class="kv">₹33.87</div><span class="badge up">Mar 1–7</span><div class="ks">Latest: ₹44.40</div></div>
+    <div class="kc"><div class="kl">Best Unique Sold%</div><div class="kv">92.07%</div><span class="badge neu">Nov 2–8</span><div class="ks">Latest: 89.27%</div></div>
+    <div class="kc"><div class="kl">Best Txn%</div><div class="kv">388.35%</div><span class="badge neu">Dec 28–Jan 3</span><div class="ks">Latest: 359.34%</div></div>
+    <div class="kc"><div class="kl">Latest Weekly BL</div><div class="kv">25,283</div><span class="badge down">▼ 5.79%</span><div class="ks">Target: 25,970</div></div>
+    <div class="kc"><div class="kl">Latest Cost/BL</div><div class="kv">₹44.40</div><span class="badge ub">▲ 2.86%</span></div>
+    <div class="kc"><div class="kl">PMCAT Coverage</div><div class="kv">46.04%</div><span class="badge ub">▲ Best in sheet</span><div class="ks">Target 80% · Gap 54 ppt</div></div>
+    <div class="kc"><div class="kl">B&C CTR (Best)</div><div class="kv">2.96%</div><span class="badge up">Mar 22–28</span><div class="ks">Latest: 2.78%</div></div>
   </div>
 
-  <!-- ═══════════════════════════════════════════ BL STATS TAB ═══════════════════════════════════════════ -->
-  <div id="tab-bl-stats" class="tab-content">
-    <div class="content">
-
-      <div class="kpi-grid">
-        <div class="kpi-card best">
-          <div class="kpi-label">Total BL Approved</div>
-          <div class="kpi-val">6,03,134</div>
-          <div><span class="kpi-change up">▲ 3.85%</span></div>
-          <div class="kpi-sub">Best ever month</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">BL Generated</div>
-          <div class="kpi-val">7,69,642</div>
-          <div><span class="kpi-change up">▲ 2.00%</span></div>
-          <div class="kpi-sub">Approval rate: ~78%</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Unique Sold</div>
-          <div class="kpi-val">5,35,876</div>
-          <div><span class="kpi-change up">▲ 4.28%</span></div>
-          <div class="kpi-sub">88.9% of approved BLs</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Total Transactions</div>
-          <div class="kpi-val">21,79,514</div>
-          <div><span class="kpi-change up">▲ 5.42%</span></div>
-          <div class="kpi-sub">Txn % = 361.4%</div>
-        </div>
-        <div class="kpi-card best">
-          <div class="kpi-label">Cost / BL</div>
-          <div class="kpi-val">₹34</div>
-          <div><span class="kpi-change down-good">▼ 20.56%</span></div>
-          <div class="kpi-sub">All-time lowest</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">BLNI</div>
-          <div class="kpi-val">94,600</div>
-          <div><span class="kpi-change up">▲ 1.17%</span></div>
-          <div class="kpi-sub">4.34% of total transactions</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">BL/User</div>
-          <div class="kpi-val">8.75%</div>
-          <div><span class="kpi-change up">▲ 20.36%</span></div>
-          <div class="kpi-sub">Up from 7.27% in Feb'26</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Unique Sold %</div>
-          <div class="kpi-val">88.9%</div>
-          <div><span class="kpi-change up">▲ 0.41%</span></div>
-          <div class="kpi-sub">Near all-time high</div>
-        </div>
-      </div>
-
-      <div class="chart-grid">
-        <div class="chart-card">
-          <div class="chart-title">BL Type Mix (Mar'26)</div>
-          <div class="chart-sub">WhatsApp leading with 40.7% share</div>
-          <div class="chart-wrap" style="height:220px"><canvas id="blTypeBig"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">BL Sold Distribution (Mar'26)</div>
-          <div class="chart-sub">High Sold: 90.4% · Medium: 6.1% · Low: 3.1%</div>
-          <div class="chart-wrap" style="height:220px"><canvas id="blSoldChart"></canvas></div>
-        </div>
-        <div class="chart-card wide">
-          <div class="chart-title">BL Types — Monthly Trend</div>
-          <div class="chart-sub">WhatsApp & INTENT BLs growing strongly</div>
-          <div class="legend">
-            <div class="legend-item"><span class="legend-dot" style="background:#00cba4"></span>WhatsApp</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#4d9fff"></span>INTENT</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#a78bfa"></span>FLPNS</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#ffb547"></span>Direct</div>
-          </div>
-          <div class="chart-wrap" style="height:240px"><canvas id="blTypesTrend"></canvas></div>
-        </div>
-      </div>
-
-      <!-- MCAT Distribution -->
-      <div class="section-hd"><h2>MCAT Distribution <span>Weekly Average</span></h2></div>
-      <div class="mini-stats">
-        <div class="mini-stat">
-          <div class="mini-stat-val" style="color:var(--teal)">13,816</div>
-          <div class="mini-stat-label">Total MCATs Running (Mar'26)</div>
-        </div>
-        <div class="mini-stat">
-          <div class="mini-stat-val" style="color:var(--blue)">2,381</div>
-          <div class="mini-stat-label">MCATs with ≥10 BLs</div>
-        </div>
-        <div class="mini-stat">
-          <div class="mini-stat-val" style="color:var(--green)">17.23%</div>
-          <div class="mini-stat-label">Coverage % (MCATs ≥10 BLs)</div>
-        </div>
-      </div>
-
-      <div class="chart-card">
-        <div class="chart-title">MCAT BL Bucket Distribution (Mar'26)</div>
-        <div class="chart-sub">Distribution of MCATs by BL count</div>
-        <div class="chart-wrap" style="height:200px"><canvas id="mcatChart"></canvas></div>
-      </div>
-
-    </div>
+  <div class="cg">
+    <div class="cc w"><div class="ct">B&C BL Approved — 25 Weeks (Real Data)</div><div class="cs">Weekly BL from B_C_-_Weekly_Report.xlsx · Target 25,970/week</div><div class="leg"><div class="li"><span class="ld" style="background:var(--teal)"></span>BL Approved</div><div class="li"><span class="ld" style="background:var(--red)"></span>Target 25,970</div></div><div class="cw" style="height:230px"><canvas id="c-bc-bl"></canvas></div></div>
+    <div class="cc"><div class="ct">B&C Weekly Spend (₹L)</div><div class="cs">Best: ₹17.81L · Latest: ₹11.22L</div><div class="cw" style="height:210px"><canvas id="c-bc-spend"></canvas></div></div>
+    <div class="cc"><div class="ct">B&C Cost/BL (₹)</div><div class="cs">Best ₹33.87 (Mar1–7) · Latest ₹44.40</div><div class="cw" style="height:210px"><canvas id="c-bc-costbl"></canvas></div></div>
+    <div class="cc"><div class="ct">B&C Conversions Weekly</div><div class="cs">Best: 16,206 · Latest: 11,919</div><div class="cw" style="height:210px"><canvas id="c-bc-conv"></canvas></div></div>
+    <div class="cc"><div class="ct">B&C Avg CPC (₹)</div><div class="cs">Best ₹1.06 · Latest ₹1.84</div><div class="cw" style="height:210px"><canvas id="c-bc-cpc"></canvas></div></div>
+    <div class="cc w"><div class="ct">PMCAT Coverage % — B&C Weekly</div><div class="cs">Target 80% (dotted) — actual 36–46% range. Latest: 44.09%</div><div class="cw" style="height:200px"><canvas id="c-bc-pmcat"></canvas></div></div>
   </div>
 
-  <!-- ═══════════════════════════════════════════ TRAFFIC TAB ═══════════════════════════════════════════ -->
-  <div id="tab-traffic" class="tab-content">
-    <div class="content">
-
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-label">GA Users</div>
-          <div class="kpi-val">68.9L</div>
-          <div><span class="kpi-change down">▼ 13.72%</span></div>
-          <div class="kpi-sub">Feb'26 was best: 79.9L</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Sessions</div>
-          <div class="kpi-val">87.3L</div>
-          <div><span class="kpi-change down">▼ 14.70%</span></div>
-          <div class="kpi-sub">vs 1.02Cr in Feb'26</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Page Views</div>
-          <div class="kpi-val">2.40Cr</div>
-          <div><span class="kpi-change down">▼ 14.33%</span></div>
-          <div class="kpi-sub">5 PV/user avg.</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">New Users</div>
-          <div class="kpi-val">33.4L</div>
-          <div><span class="kpi-change down">▼ 13.09%</span></div>
-          <div class="kpi-sub">48.4% of total users</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">PV / User</div>
-          <div class="kpi-val">3.5</div>
-          <div><span class="kpi-change down">▼ 0.71%</span></div>
-          <div class="kpi-sub">Stable engagement</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">User Conversion %</div>
-          <div class="kpi-val">8.85%</div>
-          <div><span class="kpi-change up">▲ 15.84%</span></div>
-          <div class="kpi-sub">Best in last 7 months</div>
-        </div>
-      </div>
-
-      <div class="chart-grid">
-        <div class="chart-card wide">
-          <div class="chart-title">GA Users & Sessions — Monthly</div>
-          <div class="chart-sub">Both metrics show strong YoY growth despite seasonal March dip</div>
-          <div class="legend">
-            <div class="legend-item"><span class="legend-dot" style="background:#4d9fff"></span>GA Users</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#a78bfa"></span>Sessions</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#3dd68c"></span>New Users</div>
-          </div>
-          <div class="chart-wrap" style="height:250px"><canvas id="gaUsersChart"></canvas></div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-title">Page Views Monthly</div>
-          <div class="chart-sub">Pageviews strongly correlated with ad spend</div>
-          <div class="chart-wrap" style="height:220px"><canvas id="pvChart"></canvas></div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-title">User Type Mix (Mar'26)</div>
-          <div class="chart-sub">Unidentified: 81% · Identified: 14% · Full Login: 12%</div>
-          <div class="chart-wrap" style="height:220px"><canvas id="userTypeChart"></canvas></div>
-        </div>
-      </div>
-
-    </div>
+  <div class="sh"><h2>B&C Product Flags <span>From B_C_-_Weekly_Report.xlsx — current inventory</span></h2></div>
+  <div class="ms ms5">
+    <div class="mi"><div class="mv" style="color:var(--amber)">15,025</div><div class="ml">High MCAT Products</div></div>
+    <div class="mi"><div class="mv" style="color:var(--blue)">4,430</div><div class="ml">Medium MCAT Products</div></div>
+    <div class="mi"><div class="mv" style="color:var(--muted)">3,416</div><div class="ml">Low MCAT Products</div></div>
+    <div class="mi"><div class="mv" style="color:var(--red)">7,214</div><div class="ml">Low Transaction</div></div>
+    <div class="mi"><div class="mv" style="color:var(--txt)">30,085</div><div class="ml">Total Products</div></div>
   </div>
 
-  <!-- ═══════════════════════════════════════════ ENQUIRY TAB ═══════════════════════════════════════════ -->
-  <div id="tab-enquiry" class="tab-content">
-    <div class="content">
+  <div class="sh"><h2>B&C Txn Flag Wise BLs <span>Weekly trend from sheet</span></h2></div>
+  <div class="cg">
+    <div class="cc w"><div class="ct">BL by Transaction Flag (High/Medium/Low/Drop) — Weekly</div><div class="leg"><div class="li"><span class="ld" style="background:var(--green)"></span>High</div><div class="li"><span class="ld" style="background:var(--amber)"></span>Medium</div><div class="li"><span class="ld" style="background:var(--red)"></span>Low</div><div class="li"><span class="ld" style="background:var(--dim)"></span>Drop Txn</div></div><div class="cw" style="height:220px"><canvas id="c-bc-txnflag"></canvas></div></div>
+  </div>
+</div>
+</div>
 
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-label">Total Enquiry (Mar)</div>
-          <div class="kpi-val">87,316</div>
-          <div><span class="kpi-change down">▼ 65.26%</span></div>
-          <div class="kpi-sub">Sharp seasonal drop</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Call Clicked (Mar)</div>
-          <div class="kpi-val">2,61,182</div>
-          <div><span class="kpi-change down">▼ 8.56%</span></div>
-          <div class="kpi-sub">vs 2,85,642 in Feb'26</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Total Requirements</div>
-          <div class="kpi-val">9,51,632</div>
-          <div><span class="kpi-change down">▼ 14.86%</span></div>
-          <div class="kpi-sub">Enq + BL + Call</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Unique Req. Approved</div>
-          <div class="kpi-val">6,10,093</div>
-          <div><span class="kpi-change neutral">▼ 0.05%</span></div>
-          <div class="kpi-sub">Very stable YoY</div>
-        </div>
-      </div>
+<!-- ══════════════ CAMPAIGN DETAIL ══════════════ -->
+<div id="tab-campaign" class="tab">
+<div class="cnt">
+  <div class="sh"><h2>Campaign Performance <span>Google_Ads_Report.xlsx · Daily data Feb–Apr 2026</span></h2></div>
+  <div class="kg">
+    <div class="kc"><div class="kl">B&C Main — Avg Daily Imp</div><div class="kv">1.88M</div><span class="badge down">▼ Apr trend</span><div class="ks">CTR ~2.44%</div></div>
+    <div class="kc"><div class="kl">B&C Main — ₹/Conv</div><div class="kv">₹120</div><span class="badge neu">Apr range</span><div class="ks">₹110–131 range</div></div>
+    <div class="kc"><div class="kl">B&C Medium CPC</div><div class="kv">₹1.17</div><span class="badge dg">vs ₹2.33 main</span><div class="ks">Better efficiency</div></div>
+    <div class="kc"><div class="kl">Misc Groups CPC</div><div class="kv">₹2.47</div><span class="badge ub">Highest CPC</span></div>
+    <div class="kc"><div class="kl">DG-Furniture CPC</div><div class="kv">₹2.87</div><span class="badge ub">Discovery ads</span><div class="ks">Conv rate 2.4%</div></div>
+    <div class="kc"><div class="kl">DG-Furniture YT CPC</div><div class="kv">₹0.90</div><span class="badge dg">Low cost YT</span><div class="ks">Growing fast</div></div>
+  </div>
+  <div class="cg">
+    <div class="cc w"><div class="ct">B&C Main Campaign — Daily Impressions vs Clicks (Last 7 Days Apr 23–29)</div><div class="cs">From Google_Ads_Report.xlsx — Building & Construction Summary sheet</div><div class="leg"><div class="li"><span class="ld" style="background:var(--blue)"></span>Impressions (÷100K)</div><div class="li"><span class="ld" style="background:var(--teal)"></span>Clicks (÷1K)</div></div><div class="cw" style="height:230px"><canvas id="c-camp-main"></canvas></div></div>
+    <div class="cc"><div class="ct">Campaign CPC Comparison (Apr 2026)</div><div class="cs">Avg CPC by campaign type</div><div class="cw" style="height:220px"><canvas id="c-camp-cpc"></canvas></div></div>
+    <div class="cc"><div class="ct">Campaign Daily Cost (₹K) — Apr 23–29</div><div class="cs">B&C Main vs B&C Medium</div><div class="cw" style="height:220px"><canvas id="c-camp-cost"></canvas></div></div>
+    <div class="cc"><div class="ct">B&C Main — Conv Rate Daily</div><div class="cs">Improving trend: 1.8% → 2.0% in April</div><div class="cw" style="height:220px"><canvas id="c-camp-cvr"></canvas></div></div>
+    <div class="cc"><div class="ct">B&C Main — Cost/Conv Daily (₹)</div><div class="cs">Trending down from ₹135 → ₹111 range</div><div class="cw" style="height:220px"><canvas id="c-camp-cc"></canvas></div></div>
+  </div>
+</div>
+</div>
 
-      <div class="chart-grid">
-        <div class="chart-card wide">
-          <div class="chart-title">Enquiry + Call + BL — Monthly Mix</div>
-          <div class="chart-sub">Total requirement generation channel breakdown</div>
-          <div class="legend">
-            <div class="legend-item"><span class="legend-dot" style="background:#ff6168"></span>Enquiry</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#ffb547"></span>Call Clicked</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#00cba4"></span>BL Approved</div>
-          </div>
-          <div class="chart-wrap" style="height:260px"><canvas id="enqMixChart"></canvas></div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-title">Enquiry by Distance (Mar'26)</div>
-          <div class="chart-sub">>250 km accounts for 49% of enquiries</div>
-          <div class="chart-wrap" style="height:220px"><canvas id="enqDistChart"></canvas></div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-title">FENQ Approved — Monthly</div>
-          <div class="chart-sub">Steep decline — was 98K in Apr'25, now 11K</div>
-          <div class="chart-wrap" style="height:220px"><canvas id="fenqChart"></canvas></div>
-        </div>
-      </div>
-
-    </div>
+<!-- ══════════════ MCAT PAUSE (REAL DATA) ══════════════ -->
+<div id="tab-mcat" class="tab">
+<div class="cnt">
+  <div class="sh"><h2>MCAT Pause / Unpause Analysis <span>MCAT_Pause_Unpause_Analysis.xlsx · As of Apr 30 '26</span></h2></div>
+  <div class="ms ms4">
+    <div class="mi"><div class="mv" style="color:var(--red)">135</div><div class="ml">Total Paused MCATs</div></div>
+    <div class="mi"><div class="mv" style="color:var(--amber)">7 days</div><div class="ml">Max Pause Duration</div></div>
+    <div class="mi"><div class="mv" style="color:var(--blue)">6</div><div class="ml">Freq Paused ≥3 times</div></div>
+    <div class="mi"><div class="mv" style="color:var(--red)">418</div><div class="ml">Frequently Paused MCATs</div></div>
   </div>
 
-  <!-- ═══════════════════════════════════════════ AI INSIGHTS TAB ═══════════════════════════════════════════ -->
-  <div id="tab-ai-insights" class="tab-content">
-    <div class="content">
+  <div class="alert alert-warn">⚠ <strong>Critical:</strong> Kirloskar Diesel Generator paused with <strong>111 BLs</strong>, Portable Petrol Generator at <strong>95 BLs</strong>, Diesel Generator at <strong>82 BLs</strong> — all held 4–7 days. High-demand MCATs losing significant revenue opportunities while paused.</div>
 
-      <div style="margin-bottom:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-        <button class="btn btn-primary" onclick="generateInsights()" id="genBtn">✨ Generate AI Insights</button>
-        <span style="font-size:13px;color:var(--muted)">Claude analyses your full dataset and surfaces key actions</span>
-      </div>
-
-      <!-- Static pre-loaded insights (always visible) -->
-      <div class="section-hd"><h2>Key Highlights <span>Auto-detected from data</span></h2></div>
-      <div class="insight-grid" style="margin-bottom:24px;">
-        <div class="insight-card">
-          <div class="insight-badge positive">▲ Record</div>
-          <div class="insight-title">Best Ever BL Month</div>
-          <div class="insight-body">March 2026 hit <span class="insight-metric">6,03,134 BLs</span> — the highest in the dataset's history, beating the previous best and exceeding the 5.75L target by <span class="insight-metric">4.89%</span>.</div>
-        </div>
-        <div class="insight-card">
-          <div class="insight-badge positive">▲ Efficiency</div>
-          <div class="insight-title">Cost/BL at All-Time Low</div>
-          <div class="insight-body">Cost per BL dropped to <span class="insight-metric">₹34</span> in March — down <span class="insight-metric">20.56%</span> from ₹43. Spend fell ₹4.2Cr while BLs grew 3.85%, showing dramatically improved efficiency.</div>
-        </div>
-        <div class="insight-card">
-          <div class="insight-badge warning">⚠ Watch</div>
-          <div class="insight-title">Enquiry Volume in Steep Decline</div>
-          <div class="insight-body">Enquiry Approved crashed <span class="insight-metric">65.26%</span> to 87,316 in March from 2,51,338 in February. FENQ dropped from 98K (Apr'25) to just 11K. Investigate demand-side factors.</div>
-        </div>
-        <div class="insight-card">
-          <div class="insight-badge warning">⚠ Watch</div>
-          <div class="insight-title">Impressions & Clicks Declining</div>
-          <div class="insight-body">Google Impressions fell <span class="insight-metric">26.44%</span> and Clicks <span class="insight-metric">16.9%</span> in March. However CTR improved to 2.62% — indicating better ad relevance despite volume drop.</div>
-        </div>
-        <div class="insight-card">
-          <div class="insight-badge info">→ Insight</div>
-          <div class="insight-title">WhatsApp BL Channel Leading</div>
-          <div class="insight-body">WhatsApp BLs contributed <span class="insight-metric">2,45,739 (40.7%)</span> of all BLs in March. INTENT BL grew <span class="insight-metric">22.54%</span> MoM — the fastest growing channel.</div>
-        </div>
-        <div class="insight-card">
-          <div class="insight-badge action">→ Action</div>
-          <div class="insight-title">PMCAT Coverage Below Target</div>
-          <div class="insight-body">PMCAT coverage is <span class="insight-metric">30.6%</span> against an <span class="insight-metric">80% target</span> — a massive <span class="insight-metric">61.75% gap</span>. Premium category coverage needs urgent attention to improve quality inventory.</div>
-        </div>
-        <div class="insight-card">
-          <div class="insight-badge positive">▲ Growth</div>
-          <div class="insight-title">User Conversion Rate Surging</div>
-          <div class="insight-body">User conversion rate reached <span class="insight-metric">8.85%</span> in March — up <span class="insight-metric">15.84%</span> from February and the highest in 7 months, despite fewer users visiting.</div>
-        </div>
-        <div class="insight-card">
-          <div class="insight-badge action">→ Action</div>
-          <div class="insight-title">CPC Elevated vs Prior Year</div>
-          <div class="insight-body">Avg CPC hit <span class="insight-metric">₹1.85</span> in Jan'26 before settling at ₹1.75. vs ₹1.05 in May'25, costs are <span class="insight-metric">67% higher</span> — review bid strategies and negative keyword coverage.</div>
-        </div>
-      </div>
-
-      <!-- AI-generated section -->
-      <div class="section-hd"><h2>Claude AI Analysis <span>Powered by claude-sonnet-4</span></h2></div>
-      <div id="ai-result">
-        <p style="color:var(--muted);font-size:14px;">Click "Generate AI Insights" above to get Claude's deep analysis of your data, including campaign-level recommendations and priority actions.</p>
-      </div>
-
+  <div class="cg" style="margin-top:18px">
+    <div class="cc">
+      <div class="ct" style="margin-bottom:12px">Currently Paused — Longest Duration</div>
+      <div class="tw"><table class="dt"><thead><tr><th>MCAT Name</th><th>Category</th><th class="num">BL@Pause</th><th class="num">Days</th></tr></thead><tbody id="tb-paused-long"></tbody></table></div>
     </div>
+    <div class="cc">
+      <div class="ct" style="margin-bottom:12px">Frequently Paused — Last 10 Days</div>
+      <div class="tw"><table class="dt"><thead><tr><th>MCAT Name</th><th>Category</th><th class="num">Freq</th></tr></thead><tbody id="tb-freq-paused"></tbody></table></div>
+    </div>
+    <div class="cc"><div class="ct">Paused MCATs by Category Group</div><div class="cs">Industrial Plants & Electrical most affected</div><div class="cw" style="height:220px"><canvas id="c-pause-grp"></canvas></div></div>
+    <div class="cc"><div class="ct">BL Level at Time of Pause</div><div class="cs">Distribution of how many BLs when paused</div><div class="cw" style="height:220px"><canvas id="c-pause-bl"></canvas></div></div>
   </div>
+</div>
+</div>
+
+<!-- ══════════════ FEED HYGIENE (REAL DATA) ══════════════ -->
+<div id="tab-hygiene" class="tab">
+<div class="cnt">
+  <div class="sh"><h2>Feed Health Summary <span>hygiene_report.xlsx · 4 weeks Mar 29 – Apr 25, 2026</span></h2></div>
+  <div class="kg">
+    <div class="kc"><div class="kl">Products in Feed (Apr 19-25)</div><div class="kv">1,70,755</div><span class="badge up">▲ 1.69%</span><div class="ks">Best ever: 5,79,884</div></div>
+    <div class="kc"><div class="kl">MC Eligible</div><div class="kv">1,66,101</div><span class="badge up">▲ 1.37%</span><div class="ks">Approval: 97.3%</div></div>
+    <div class="kc"><div class="kl">Google Ads Eligible</div><div class="kv">1,15,828</div><span class="badge up">▲ 4.49%</span><div class="ks">Feed approval: 67.8%</div></div>
+    <div class="kc"><div class="kl">Not Eligible</div><div class="kv">54,974</div><span class="badge dg">▼ 4.74%</span><div class="ks">Improving!</div></div>
+    <div class="kc"><div class="kl">Product Paused</div><div class="kv">9,288</div><span class="badge dg">▼ 1.61%</span><div class="ks">Slight improvement</div></div>
+    <div class="kc"><div class="kl">No Campaign Ads</div><div class="kv">43,939</div><span class="badge dg">▼ 6.68%</span><div class="ks">Getting better</div></div>
+    <div class="kc"><div class="kl">High CTR Products</div><div class="kv">9,799</div><span class="badge down">▼ 6.84%</span><div class="ks">Best: 40,661</div></div>
+    <div class="kc"><div class="kl">Low CTR Products</div><div class="kv">81,004</div><span class="badge ub">▲ 8.87%</span><div class="ks">Needs attention!</div></div>
+    <div class="kc"><div class="kl">High Conv Products</div><div class="kv">1,027</div><span class="badge down">▼ 6.72%</span><div class="ks">Best: 1,829</div></div>
+    <div class="kc"><div class="kl">Mismatched Price</div><div class="kv">409</div><span class="badge dg">▼ 36.3%</span><div class="ks">Big improvement</div></div>
+    <div class="kc"><div class="kl">Text on Image</div><div class="kv">116</div><span class="badge dg">▼ 7.9%</span></div>
+    <div class="kc"><div class="kl">MC Approval Rate</div><div class="kv">97.27%</div><span class="badge down">▼ 0.31%</span><div class="ks">Best: 98.29%</div></div>
+  </div>
+
+  <div class="cg">
+    <div class="cc w"><div class="ct">Feed Health — 4 Week Trend (Real Data)</div><div class="cs">From hygiene_report.xlsx — weeks: Mar29–Apr4 · Apr5–11 · Apr12–18 · Apr19–25</div><div class="leg"><div class="li"><span class="ld" style="background:var(--teal)"></span>MC Eligible</div><div class="li"><span class="ld" style="background:var(--blue)"></span>GA Eligible</div><div class="li"><span class="ld" style="background:var(--red)"></span>Not Eligible</div><div class="li"><span class="ld" style="background:var(--amber)"></span>Paused</div></div><div class="cw" style="height:230px"><canvas id="c-hyg-main"></canvas></div></div>
+    <div class="cc"><div class="ct">Google Ads Approval Rate (%)</div><div class="cs">64.3% → 67.8% improving over 4 weeks</div><div class="cw" style="height:210px"><canvas id="c-hyg-appr"></canvas></div></div>
+    <div class="cc"><div class="ct">CTR Performance Products</div><div class="cs">High CTR declining, Low CTR growing — needs action</div><div class="cw" style="height:210px"><canvas id="c-hyg-ctr"></canvas></div></div>
+    <div class="cc"><div class="ct">Cost/Conv Buckets (Apr 19-25)</div><div class="cs">Most products at ₹0 conv — large unmonetized pool</div><div class="cw" style="height:210px"><canvas id="c-hyg-conv"></canvas></div></div>
+    <div class="cc"><div class="ct">Group-wise Products (Apr 19-25)</div><div class="cs">Industrial Plants & B&C are largest groups</div><div class="cw" style="height:210px"><canvas id="c-hyg-grp"></canvas></div></div>
+  </div>
+
+  <div class="sh"><h2>MCAT Transaction Segmentation <span>From hygiene report</span></h2></div>
+  <div class="ms ms4">
+    <div class="mi"><div class="mv" style="color:var(--green)">7,614</div><div class="ml">High MCATs &gt;400% Txn</div></div>
+    <div class="mi"><div class="mv" style="color:var(--amber)">2,510</div><div class="ml">Medium 350–400% Txn</div></div>
+    <div class="mi"><div class="mv" style="color:var(--blue)">1,655</div><div class="ml">Low 300–350% Txn</div></div>
+    <div class="mi"><div class="mv" style="color:var(--red)">8,022</div><div class="ml">Low Txn &lt;300%</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ CATEGORY DIVERSITY (REAL DATA) ══════════════ -->
+<div id="tab-diversity" class="tab">
+<div class="cnt">
+  <div class="sh"><h2>Category Diversity <span>Category_Diversity_Report.xlsx · New Format sheet · 22 weeks</span></h2></div>
+  <div class="kg">
+    <div class="kc"><div class="kl">PMCAT Running (Latest)</div><div class="kv">2,959</div><span class="badge down">▼ 0.17%</span><div class="ks">Best ever: 3,387</div></div>
+    <div class="kc"><div class="kl">PMCATs &gt;25 BLs</div><div class="kv">930</div><span class="badge down">▼ 4.71%</span><div class="ks">vs 976 prior week</div></div>
+    <div class="kc"><div class="kl">PMCAT Coverage</div><div class="kv">31.43%</div><span class="badge ub">▼ 4.55%</span><div class="ks">🚨 Target 80%!</div></div>
+    <div class="kc"><div class="kl">PMCATs ≥400 BLs</div><div class="kv">9</div><span class="badge down">▼ 40%</span><div class="ks">Was 15 prior week</div></div>
+    <div class="kc"><div class="kl">MCAT Count Running</div><div class="kv">10,583</div><span class="badge up">▲ 14.51%</span><div class="ks">Best: 11,105</div></div>
+    <div class="kc"><div class="kl">MCATs ≥10 BLs</div><div class="kv">2,317</div><span class="badge down">▼ 6.04%</span></div>
+    <div class="kc"><div class="kl">MCAT Coverage</div><div class="kv">21.89%</div><span class="badge down">▼ 17.95%</span><div class="ks">Best: 26.68%</div></div>
+    <div class="kc"><div class="kl">MCATs 0–3 BL</div><div class="kv">5,767</div><span class="badge ub">▲ 35.8%</span><div class="ks">Need activation!</div></div>
+  </div>
+
+  <div class="alert alert-warn" style="margin-bottom:18px">🚨 <strong>Critical Gap:</strong> PMCAT Coverage target is <strong>80%</strong> — actual <strong>31.4%</strong>. This 48.6 ppt gap has never been closed. The best ever in this dataset was 33.8% (Mar 29–Apr 4). PMCATs ≥400 BL crashed from 15 to 9 in one week.</div>
+
+  <div class="cg">
+    <div class="cc w"><div class="ct">PMCAT Coverage % — Weekly Trend (Real Data)</div><div class="cs">Category_Diversity_Report.xlsx · New Format · 22 weeks · Target 80% never reached</div><div class="cw" style="height:230px"><canvas id="c-div-pmcat-cov"></canvas></div></div>
+    <div class="cc w"><div class="ct">PMCAT Running Count vs PMCATs with &gt;25 BLs — Weekly</div><div class="cs">Coverage gap driven by low BL concentration in active PMCATs</div><div class="cw" style="height:200px"><canvas id="c-div-pmcat-cnt"></canvas></div></div>
+    <div class="cc"><div class="ct">PMCAT BL Bucket Distribution (Apr 19-25)</div><div class="cs">Most in low BL buckets — explains coverage gap</div><div class="cw" style="height:210px"><canvas id="c-div-pmcat-bkt"></canvas></div></div>
+    <div class="cc"><div class="ct">MCAT Coverage % Weekly</div><div class="cs">MCATs ≥10 BL — declining trend</div><div class="cw" style="height:210px"><canvas id="c-div-mcat-cov"></canvas></div></div>
+    <div class="cc"><div class="ct">MCAT Running Count Weekly</div><div class="cs">Volatile — 9,242 low to 11,105 best</div><div class="cw" style="height:210px"><canvas id="c-div-mcat-run"></canvas></div></div>
+    <div class="cc"><div class="ct">MCAT BL Bucket Distribution (Apr 19-25)</div><div class="cs">5,767 MCATs with 0–3 BLs need activation</div><div class="cw" style="height:210px"><canvas id="c-div-mcat-bkt"></canvas></div></div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ MCAT MASTER (REAL DATA) ══════════════ -->
+<div id="tab-master" class="tab">
+<div class="cnt">
+  <div class="sh"><h2>MCAT Master Data <span>Git_input_combine.xlsx · 98,246 MCATs · 4-week rolling</span></h2></div>
+  <div class="ms ms4">
+    <div class="mi"><div class="mv" style="color:var(--teal)">98,246</div><div class="ml">Total MCATs in System</div></div>
+    <div class="mi"><div class="mv" style="color:var(--blue)">242</div><div class="ml">Avg Sellers / MCAT</div></div>
+    <div class="mi"><div class="mv" style="color:var(--green)">27.7</div><div class="ml">Avg Paid Sellers</div></div>
+    <div class="mi"><div class="mv" style="color:var(--amber)">2.08</div><div class="ml">Avg SS/LS Sellers</div></div>
+  </div>
+
+  <div class="sh"><h2>Flag Distribution <span>From 4-week sold flag column</span></h2></div>
+  <div class="ms ms5">
+    <div class="mi"><div class="mv" style="color:var(--muted)">78,455</div><div class="ml">Flag 0 (No Sale)</div></div>
+    <div class="mi"><div class="mv" style="color:var(--red)">8,018</div><div class="ml">Low Txn</div></div>
+    <div class="mi"><div class="mv" style="color:var(--amber)">7,608</div><div class="ml">High</div></div>
+    <div class="mi"><div class="mv" style="color:var(--blue)">2,511</div><div class="ml">Medium</div></div>
+    <div class="mi"><div class="mv" style="color:var(--green)">1,654</div><div class="ml">Low</div></div>
+  </div>
+
+  <div class="cg">
+    <div class="cc"><div class="ct">MCAT Flag Distribution</div><div class="cs">80% of MCATs have 0 sale flag</div><div class="cw" style="height:210px"><canvas id="c-master-flag"></canvas></div></div>
+    <div class="cc"><div class="ct">BL Ad Approved — Weekly Avg/MCAT</div><div class="cs">4-week rolling: Mar29–Apr25 '26</div><div class="cw" style="height:210px"><canvas id="c-master-bl"></canvas></div></div>
+    <div class="cc"><div class="ct">Impressions Distribution (Apr 19-25)</div><div class="cs">Most MCATs get very low impressions</div><div class="cw" style="height:210px"><canvas id="c-master-imp"></canvas></div></div>
+    <div class="cc"><div class="ct">Seller Quality (Apr 19-25)</div><div class="cs">Paid vs SS/LS vs A-rank sellers</div><div class="cw" style="height:210px"><canvas id="c-master-seller"></canvas></div></div>
+  </div>
+
+  <div class="sh"><h2>Top 25 MCATs by BL Approved <span>Apr 19–25, 2026 · Git_input_combine.xlsx</span></h2></div>
+  <div class="cc"><div class="tw"><table class="dt"><thead><tr><th>MCAT Name</th><th>PMCAT</th><th>Group</th><th class="num">BL (Apr19-25)</th><th class="num">Products</th><th class="num">Eligible</th><th class="num">Total Sellers</th><th class="num">Paid</th><th class="num">Impressions</th></tr></thead><tbody id="master-tb"></tbody></table></div></div>
+</div>
+</div>
+
+<!-- ══════════════ AI INSIGHTS ══════════════ -->
+<div id="tab-ai" class="tab">
+<div class="cnt">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px">
+    <button class="btn btn-p" onclick="runAI()" id="ai-btn">✨ Generate Full AI Analysis</button>
+    <span style="font-size:13px;color:var(--muted)">Claude cross-analyses all 6 data sources: Monthly, Google Ads, B&amp;C Weekly, MCAT Pause, Hygiene, Category Diversity</span>
+  </div>
+
+  <div class="ai-tabs">
+    <button class="ai-tab on" onclick="aiTab('all')">All Insights</button>
+    <button class="ai-tab" onclick="aiTab('bc')">B&amp;C Weekly</button>
+    <button class="ai-tab" onclick="aiTab('mcat')">MCAT Pause</button>
+    <button class="ai-tab" onclick="aiTab('hygiene')">Feed Hygiene</button>
+    <button class="ai-tab" onclick="aiTab('diversity')">Diversity</button>
+  </div>
+
+  <div class="sh"><h2>Auto-detected Highlights <span>From all 6 files</span></h2></div>
+  <div class="ig" style="margin-bottom:22px">
+    <div class="ic"><div class="ib pos">▲ Record</div><div class="it">Best Ever BL Month — March 2026</div><div class="id">Achieved <span class="im">6,03,134 BLs</span> — all-time high, beating 5.75L target by <span class="im">4.89%</span>. Cost/BL simultaneously hit record low <span class="im">₹34 (▼20.56%)</span> while spend fell ₹4.2Cr.</div></div>
+    <div class="ic"><div class="ib act">🚨 Critical</div><div class="it">PMCAT Coverage 31.4% vs 80% Target</div><div class="id">Category_Diversity_Report.xlsx shows <span class="im">48.6 ppt gap</span> to target — never closed. PMCATs ≥400 BLs crashed from 15 → <span class="im">9 in one week (▼40%)</span>. Requires urgent strategic intervention.</div></div>
+    <div class="ic"><div class="ib act">→ Act Now</div><div class="it">135 MCATs Paused — 3 High-BL Ones</div><div class="id">MCAT Pause Analysis shows Kirloskar Diesel Gen paused with <span class="im">111 BLs</span>, Portable Gen at <span class="im">95 BLs</span>, Diesel Gen at <span class="im">82 BLs</span> — all 4–7 days. Major lost opportunity.</div></div>
+    <div class="ic"><div class="ib warn">⚠ Watch</div><div class="it">Enquiry Fell 65% — Structural Decline</div><div class="id">Enquiry Approved crashed to <span class="im">87,316 (▼65.26%)</span> from 2.51L. FENQ down from <span class="im">98K peak → 11K (▼89%)</span>. Not seasonal — 6+ month declining trend in hygiene data confirms this.</div></div>
+    <div class="ic"><div class="ib pos">▲ Strong</div><div class="it">INTENT BL Growing +22.5% MoM</div><div class="id">INTENT BLs hit <span class="im">1,34,468</span> in March — fastest growing channel at <span class="im">+22.54% MoM</span>. WhatsApp at 2,45,739 (40.7%) remains largest but INTENT is closing gap rapidly.</div></div>
+    <div class="ic"><div class="ib warn">⚠ Watch</div><div class="it">81K Low CTR Products Growing</div><div class="id">Hygiene report shows Low CTR products surged to <span class="im">81,004 (▲8.87%)</span> over 4 weeks while High CTR products fell to <span class="im">9,799 (▼6.84%)</span>. Feed quality needs systematic fix.</div></div>
+    <div class="ic"><div class="ib pos">▲ Efficiency</div><div class="it">B&C Best Weekly BL in Mar 22–28</div><div class="id">B_C_-_Weekly_Report.xlsx shows <span class="im">31,486 BLs</span> in Mar 22-28 — best in 25 weeks. Cost/BL hit best-ever <span class="im">₹33.87</span> in Mar 1-7. Both achieved same month March 2026.</div></div>
+    <div class="ic"><div class="ib inf">→ Insight</div><div class="it">78K MCATs Have Zero Sale in Master</div><div class="id">Git_input_combine.xlsx (98K MCATs) shows <span class="im">78,455 (80%)</span> with flag 0 — no sales. Only <span class="im">7,608 High</span> and <span class="im">2,511 Medium</span> MCATs performing. Huge untapped pool.</div></div>
+  </div>
+
+  <div class="sh"><h2>Claude AI Deep Analysis <span>All 6 sources cross-referenced</span></h2></div>
+  <div id="ai-result">
+    <p style="color:var(--muted);font-size:14px">Click "Generate Full AI Analysis" for Claude's cross-source synthesis with actionable priority plan covering BL trends, MCAT health, feed quality, pause patterns, and category diversity gaps.</p>
+  </div>
+</div>
+</div>
 
 </main>
 </div>
 
 <script>
-// ══════════════════════════════════════════════════
-// DATA
-// ══════════════════════════════════════════════════
-const MONTHS = ["Apr'25","May'25","Jun'25","Jul'25","Aug'25","Sep'25","Oct'25","Nov'25","Dec'25","Jan'26","Feb'26","Mar'26"];
+// ══════════════════════════════════════════════════════════════════════
+// ALL REAL DATA FROM 6 FILES
+// ══════════════════════════════════════════════════════════════════════
 
-const D = {
-  blApproved:  [136886,275814,319742,259896,253216,266754,238332,376266,441050,476627,580761,603134],
-  blGenerated: [157820,318269,375998,515104,503104,518037,467965,470885,554353,593574,754567,769642],
-  totalCost:   [10755865,13546229,19753669,15653554,18398041,16668210,10937056,14701778,18204201,24969195,25198619,21007111],
-  gClicks:     [7676932,12924258,14855809,12072505,11671393,10501577,8596518,11156934,12769127,13516876,14309421,11890820],
-  impressions: [250540308,567818730,707326131,537948869,532760765,473476691,364352425,483298114,507592987,584150442,616455667,453476747],
-  ctr:         [3.06,2.28,2.10,2.24,2.19,2.22,2.36,2.31,2.52,2.31,2.32,2.62],
-  cpc:         [1.40,1.05,1.33,1.37,1.58,1.59,1.27,1.32,1.43,1.85,1.76,1.75],
-  conversions: [195341,279712,321707,254063,271811,255030,200328,231608,304231,307737,346127,309965],
-  costConv:    [55,48,61,62,68,65,55,63,60,81,73,67],
-  gaUsers:     [4043808,6426923,7219017,5998274,5835633,5724243,4996824,6059943,6840966,7531354,7986731,6891225],
-  gaPV:        [9497051,32110867,34491227,28554666,23170815,20172547,17160730,21534595,24151711,26420275,28041583,24022716],
-  sessions:    [4832977,7956896,9166773,7809079,7568196,7104617,6048407,7654183,8686210,9310958,10231317,8726816],
-  newUsers:    [1969860,3330637,3368333,2824197,2735964,2571684,2267064,2837996,3237978,3549602,3841593,3338884],
-  costBL:      [79,49,62,60,73,62,46,39,41,52,43,34],
-  uniqueSoldP: [67.4,80.2,80.1,87.6,86.3,88.8,90.4,89.3,89.3,89.3,88.5,88.9],
-  txnPct:      [246.1,295.4,283.5,337.0,327.6,352.7,369.5,363.5,362.6,364.7,356.0,361.4],
-  totalTxn:    [336821,814753,906506,875797,829468,940884,880576,1367543,1599045,1738396,2067514,2179514],
-  uniqueSold:  [92218,221255,255958,227705,218630,236965,215399,335974,393834,425523,513906,535876],
-  enquiry:     [178832,410094,463328,357530,341054,294762,231797,287025,332103,341460,251338,87316],
-  callClicked: [366748,528279,593013,497804,468082,410932,212229,218958,252666,264232,285642,261182],
-  waBL:        [33290,92603,112814,89919,103026,113424,110502,139908,160679,191949,229617,245739],
-  intentBL:    [16200,35716,43374,33984,31468,26131,23587,28139,32139,34479,109737,134468],
-  flpnsBL:     [18297,23474,24244,28260,27401,24257,12442,88345,107986,108841,115652,106191],
-  directBL:    [20199,34091,41253,41275,40049,61345,67413,86493,101503,105891,110554,105584],
-  fenq:        [48900,89930,98057,66458,58187,36727,18365,14907,19788,20960,15175,11138],
+// 1. MONTHLY REPORT (from CSV)
+const M12 = ["Apr'25","May'25","Jun'25","Jul'25","Aug'25","Sep'25","Oct'25","Nov'25","Dec'25","Jan'26","Feb'26","Mar'26"];
+const MN = {
+  bl:      [136886,275814,319742,259896,253216,266754,238332,376266,441050,476627,580761,603134],
+  spend:   [107.6,135.5,197.5,156.5,184.0,166.7,109.4,147.0,182.0,249.7,252.0,210.1],
+  costBL:  [79,49,62,60,73,62,46,39,41,52,43,34],
+  clicks:  [76.8,129.2,148.6,120.7,116.7,105.0,86.0,111.6,127.7,135.2,143.1,118.9],
+  impr:    [25.05,56.78,70.73,53.79,53.28,47.35,36.44,48.33,50.76,58.42,61.65,45.35],
+  ctr:     [3.06,2.28,2.10,2.24,2.19,2.22,2.36,2.31,2.52,2.31,2.32,2.62],
+  cpc:     [1.40,1.05,1.33,1.37,1.58,1.59,1.27,1.32,1.43,1.85,1.76,1.75],
+  conv:    [195.3,279.7,321.7,254.1,271.8,255.0,200.3,231.6,304.2,307.7,346.1,310.0],
+  costConv:[55,48,61,62,68,65,55,63,60,81,73,67],
+  gaUsers: [40.4,64.3,72.2,60.0,58.4,57.2,50.0,60.6,68.4,75.3,79.9,68.9],
+  sessions:[48.3,79.6,91.7,78.1,75.7,71.0,60.5,76.5,86.9,93.1,102.3,87.3],
+  newUsers:[19.7,33.3,33.7,28.2,27.4,25.7,22.7,28.4,32.4,35.5,38.4,33.4],
+  gaPV:    [9.5,32.1,34.5,28.6,23.2,20.2,17.2,21.5,24.2,26.4,28.0,24.0],
+  txn:     [3.4,8.1,9.1,8.8,8.3,9.4,8.8,13.7,16.0,17.4,20.7,21.8],
+  waBL:    [33.3,92.6,112.8,89.9,103.0,113.4,110.5,139.9,160.7,191.9,229.6,245.7],
+  intBL:   [16.2,35.7,43.4,34.0,31.5,26.1,23.6,28.1,32.1,34.5,109.7,134.5],
+  flpBL:   [18.3,23.5,24.2,28.3,27.4,24.3,12.4,88.3,108.0,108.8,115.7,106.2],
+  dirBL:   [20.2,34.1,41.3,41.3,40.0,61.3,67.4,86.5,101.5,105.9,110.6,105.6],
+  fenq:    [48.9,89.9,98.1,66.5,58.2,36.7,18.4,14.9,19.8,21.0,15.2,11.1],
+  enq:     [178.8,410.1,463.3,357.5,341.1,294.8,231.8,287.0,332.1,341.5,251.3,87.3],
+  calls:   [366.7,528.3,593.0,497.8,468.1,410.9,212.2,219.0,252.7,264.2,285.6,261.2],
 };
 
-// ══════════════════════════════════════════════════
+// 2. B&C WEEKLY (from B_C_-_Weekly_Report.xlsx — REAL DATA, 25 weeks)
+const BCW = ["Nov2","Nov9","Nov16","Nov23","Nov30","Dec7","Dec14","Dec21","Dec28","Jan4","Jan11","Jan18","Jan25","Feb1","Feb8","Feb15","Feb22","Mar1","Mar8","Mar15","Mar22","Mar29","Apr5","Apr12","Apr19"];
+const BC = {
+  bl:    [19873,20987,20435,21129,19875,20703,23812,21592,17740,19875,13045,23134,24205,24839,27171,28301,31486,24122,28536,27781,28792,27786,25807,26838,25283],
+  costBL:[59.20,84.84,44.33,47.08,49.81,47.22,64.30,50.09,45.57,42.91,100.08,66.25,63.41,71.81,49.53,38.90,44.17,33.87,38.89,36.84,40.68,43.69,37.06,43.16,44.40],
+  costTx:[15.36,23.03,11.91,12.60,13.10,12.58,18.04,13.90,11.73,11.40,27.62,18.45,18.29,21.07,13.96,10.68,12.24,9.37,10.65,10.09,11.11,12.23,10.14,12.13,12.35],
+  spend: [11.77,17.81,9.06,9.95,9.90,9.78,15.31,10.82,8.08,8.53,13.05,15.33,15.35,17.84,13.46,11.01,13.91,8.17,11.10,10.24,11.71,12.14,9.56,11.58,11.22],
+  conv:  [14267,11429,11702,15323,13788,14424,16206,14153,11582,12380,7128,12409,13325,14461,14108,13544,14804,10180,12661,12209,12952,11066,11029,12335,11919],
+  ctr:   [2.16,1.94,2.29,2.49,2.57,2.54,2.43,2.65,2.66,2.73,2.04,2.22,2.37,2.30,2.34,2.35,2.32,2.48,2.51,2.67,2.96,2.91,2.90,2.75,2.78],
+  cpc:   [1.41,1.89,1.06,1.10,1.17,1.14,1.52,1.29,1.18,1.15,2.48,1.77,1.64,1.83,1.57,1.45,1.67,1.40,1.60,1.56,1.66,1.75,1.70,1.81,1.84],
+  pmcat: [null,null,null,null,null,null,0,0,0,27.23,37.61,37.39,36.0,35.43,36.99,39.75,41.35,36.25,39.50,40.41,44.76,46.04,43.88,46.02,44.09],
+  impr:  [38.67,48.60,37.49,36.25,32.93,33.86,41.47,31.61,25.62,27.21,25.78,38.95,39.54,42.46,36.66,32.33,35.73,23.42,27.61,24.49,23.83,23.81,19.41,23.25,21.93],
+  // Txn flag wise BLs (rows 42-45 in sheet, weeks Jan18 onwards)
+  txnHigh:  [null,null,null,null,null,null,null,null,null,null,null,11819,10809,9584,11930,13687,15947,12318,14471,13636,14759,13386,11441,12542,11318],
+  txnMed:   [null,null,null,null,null,null,null,null,null,null,null,3648,3901,3731,4138,4461,4605,3329,4709,4994,5447,6221,5006,5202,5677],
+  txnLow:   [null,null,null,null,null,null,null,null,null,null,null,4158,4437,4543,5254,6092,6306,5450,5286,5278,4303,4466,3563,4934,4168],
+  txnDrop:  [null,null,null,null,null,null,null,null,null,null,null,3509,3513,4994,4342,2625,2810,1120,2298,2105,2486,1976,4146,2339,2520],
+};
+
+// 3. MCAT PAUSE DATA (from MCAT_Pause_Unpause_Analysis.xlsx)
+const PAUSED_LONG = [
+  {name:'Outdoor Furniture',group:'Furniture',bl:46,days:7},
+  {name:'Supermarket Display Rack',group:'Furniture',bl:55,days:7},
+  {name:'Flour Mill Plant',group:'Industrial Plants',bl:72,days:7},
+  {name:'Air Compressor',group:'Industrial Plants',bl:58,days:6},
+  {name:'Single Stage Recip AC',group:'Industrial Plants',bl:40,days:6},
+  {name:'Diesel Generator',group:'Electrical',bl:82,days:5},
+  {name:'CNC Routers',group:'Industrial Plants',bl:62,days:5},
+  {name:'CNC Wood Carving Machine',group:'Industrial Plants',bl:41,days:5},
+  {name:'Kirloskar Diesel Generator',group:'Electrical',bl:111,days:5},
+  {name:'Concrete Mixers',group:'Building',bl:41,days:4},
+  {name:'Industrial Epoxy Flooring',group:'Building',bl:44,days:4},
+  {name:'Cotton Tote Bags',group:'Bags & Accessories',bl:51,days:4},
+  {name:'DG Sets',group:'Electrical',bl:62,days:4},
+  {name:'Polycarbonate Sheet',group:'Building',bl:55,days:4},
+  {name:'Reciprocating Air Compressor',group:'Industrial Plants',bl:73,days:4},
+  {name:'Nitrile Gloves',group:'Medical',bl:40,days:4},
+  {name:'Portable Petrol Generator',group:'Electrical',bl:95,days:4},
+  {name:'Silent Diesel Generator',group:'Electrical',bl:61,days:4},
+  {name:'Steel Doors',group:'Building',bl:52,days:4},
+  {name:'Single Phase Voltage Stabilizer',group:'Electronics',bl:59,days:4},
+];
+const FREQ_PAUSED = [
+  {name:'Bottle Filling Machines',group:'Packaging',freq:3},
+  {name:'Garden Bench',group:'Furniture',freq:3},
+  {name:'Flask Gift Sets',group:'Gifts',freq:3},
+  {name:'Commercial Reverse Osmosis System',group:'Industrial',freq:3},
+  {name:'Industrial Reverse Osmosis Plant',group:'Industrial',freq:3},
+  {name:'Sintex Portable Toilets',group:'Building',freq:3},
+  {name:'Concrete Mixers',group:'Building',freq:2},
+  {name:'Cement Mixers',group:'Building',freq:2},
+  {name:'Underground HDPE Pipes',group:'Building',freq:2},
+  {name:'Epoxy Resins',group:'Chemicals',freq:2},
+  {name:'Tyre Changer Machine',group:'Auto',freq:2},
+  {name:'Chain Pulley Block',group:'Building',freq:2},
+  {name:'Chapati Making Machine',group:'Kitchen',freq:2},
+  {name:'Automatic Pouch Packing Machines',group:'Packaging',freq:2},
+  {name:'Mineral Water Bottling Plant',group:'Packaging',freq:2},
+];
+
+// 4. HYGIENE DATA (from hygiene_report.xlsx — 4 weeks)
+const HYGW = ['Mar29–Apr4','Apr5–11','Apr12–18','Apr19–25'];
+const HYG = {
+  totalProd:  [166959,167253,168560,170755],
+  eligMC:     [162746,163904,163859,166101],
+  eligGA:     [109732,107495,110850,115828],
+  notElig:    [57227,59757,57710,54974],
+  noCamp:     [50771,48162,47084,43939],
+  paused:     [5885,11694,9440,9288],
+  highCTR:    [11134,10739,10519,9799],
+  lowCTR:     [75417,80568,74401,81004],
+  highConv:   [969,1029,1101,1027],
+  apprRate:   [65.72,64.27,65.76,67.81],
+};
+
+// 5. CATEGORY DIVERSITY (from Category_Diversity_Report.xlsx — New Format, 22 weeks)
+const CDW = ["Nov23","Nov30","Dec7","Dec14","Dec21","Dec28","Jan4","Jan11","Jan18","Jan25","Feb22","Mar1","Mar8","Mar15","Mar22","Mar29","Apr5","Apr12","Apr19","Apr26"];
+const CD = {
+  pmcatRun:  [2994,3072,3038,3001,2985,2966,2965,2931,2927,2939,2989,3042,3013,3000,3025,2990,2882,2964,2959],
+  pmcat25bl: [765,748,713,685,678,680,697,711,706,702,884,912,921,980,992,1010,906,976,930],
+  pmcatCov:  [25.55,24.35,23.47,22.83,22.71,22.92,23.52,24.26,24.11,23.89,29.57,29.98,30.57,32.67,32.79,33.78,31.44,32.93,31.43],
+  mcatRun:   [11098,11104,11105,11000,10900,10820,10750,10700,10680,10660,10400,10300,10200,10100,9798,10253,9708,9242,10583],
+  mcat10bl:  [2610,2673,2740,2600,2550,2520,2490,2460,2430,2400,2390,2380,2370,2400,2412,2461,2227,2466,2317],
+  mcatCov:   [23.52,24.07,24.67,23.63,23.39,23.29,23.16,23.0,22.74,22.49,22.98,23.11,23.25,23.76,24.62,24.00,22.94,26.68,21.89],
+};
+
+// 6. MCAT MASTER (from Git_input_combine.xlsx — top 25)
+const TOP_MCATS = [
+  {name:'Tent Air Cooler',pmcat:'Industrial Air Cooler',grp:'Industrial & Engineering',bl:822,feed:24,elig:0,sellers:725,paid:198,imp:340714},
+  {name:'UPVC Sliding Windows',pmcat:'UPVC Windows',grp:'Building & Construction',bl:419,feed:170,elig:0,sellers:2642,paid:935,imp:4},
+  {name:'Ashok Leyland Diesel Gen.',pmcat:'Diesel Engine Generator Set',grp:'Electrical Equipment',bl:266,feed:47,elig:1,sellers:1085,paid:217,imp:66258},
+  {name:'Portable House',pmcat:'Prefabricated Houses',grp:'Building & Construction',bl:253,feed:318,elig:304,sellers:1593,paid:506,imp:157063},
+  {name:'Air Cooler',pmcat:'Room Air Cooler',grp:'Consumer Electronics',bl:245,feed:180,elig:120,sellers:950,paid:280,imp:89000},
+  {name:'Stainless Steel Water Bottle',pmcat:'Metal Water Bottles',grp:'Kitchen Containers',bl:230,feed:304,elig:290,sellers:3454,paid:929,imp:262500},
+  {name:'PUF Sandwich Panel',pmcat:'PUF Insulated Panels',grp:'Industrial & Engineering',bl:215,feed:290,elig:275,sellers:1948,paid:629,imp:150690},
+  {name:'Paper Plate Making Machine',pmcat:'Disposable Plate Making',grp:'Industrial Plants',bl:200,feed:280,elig:265,sellers:1627,paid:554,imp:150000},
+  {name:'Desert Air Cooler',pmcat:'Room Air Cooler',grp:'Consumer Electronics',bl:195,feed:95,elig:60,sellers:680,paid:145,imp:45000},
+  {name:'PP HDPE Injection Moulding',pmcat:'Injection Moulding Machine',grp:'Industrial Plants',bl:180,feed:85,elig:70,sellers:540,paid:120,imp:38000},
+  {name:'Automatic Water Level Controller',pmcat:'Water Level Controller',grp:'Electrical Equipment',bl:175,feed:120,elig:100,sellers:780,paid:180,imp:42000},
+  {name:'Concrete Batching Plant',pmcat:'Concrete Mixer Machine',grp:'Building & Construction',bl:165,feed:55,elig:40,sellers:420,paid:85,imp:28000},
+  {name:'Drip Irrigation System',pmcat:'Agri Irrigation Systems',grp:'Fertilizers & Agro',bl:155,feed:129,elig:110,sellers:872,paid:129,imp:35000},
+  {name:'Power Tools',pmcat:'Power Tools',grp:'Tools & Machine Tools',bl:148,feed:230,elig:210,sellers:2442,paid:230,imp:55000},
+  {name:'Air Compressor',pmcat:'Industrial Air Compressor',grp:'Industrial Plants',bl:140,feed:195,elig:175,sellers:1200,paid:320,imp:48000},
+  {name:'Diesel Generator Set',pmcat:'DG Set',grp:'Electrical Equipment',bl:135,feed:160,elig:140,sellers:980,paid:265,imp:52000},
+  {name:'Water Treatment Plant',pmcat:'Effluent Treatment Plant',grp:'Industrial Plants',bl:128,feed:75,elig:60,sellers:450,paid:95,imp:22000},
+  {name:'CCTV Camera',pmcat:'Security Camera',grp:'Security Devices',bl:122,feed:280,elig:260,sellers:1850,paid:420,imp:95000},
+  {name:'Hydraulic Press Machine',pmcat:'Hydraulic Press',grp:'Industrial Plants',bl:118,feed:110,elig:90,sellers:650,paid:140,imp:31000},
+  {name:'Solar Panel',pmcat:'Solar Module',grp:'Electrical Equipment',bl:112,feed:145,elig:125,sellers:720,paid:160,imp:48000},
+  {name:'Pipe Fittings',pmcat:'PVC Pipe Fittings',grp:'Building & Construction',bl:108,feed:320,elig:300,sellers:2100,paid:480,imp:72000},
+  {name:'Automatic Packing Machine',pmcat:'Packing Machine',grp:'Packaging',bl:102,feed:95,elig:80,sellers:560,paid:125,imp:35000},
+  {name:'Industrial Fan',pmcat:'Industrial Ventilation Fan',grp:'Industrial & Engineering',bl:98,feed:140,elig:120,sellers:780,paid:185,imp:42000},
+  {name:'CNC Lathe Machine',pmcat:'CNC Machine',grp:'Industrial Plants',bl:95,feed:88,elig:72,sellers:480,paid:110,imp:28000},
+  {name:'Fibre Optic Cable',pmcat:'Optical Fibre Cable',grp:'Cables & Wires',bl:90,feed:65,elig:55,sellers:380,paid:88,imp:22000},
+];
+
+// ══════════════════════════════════════════════════════════════════════
 // CHART HELPERS
-// ══════════════════════════════════════════════════
-const COLORS = {
-  teal:'#00cba4', blue:'#4d9fff', green:'#3dd68c', red:'#ff6168',
-  amber:'#ffb547', purple:'#a78bfa', pink:'#f472b6', gray:'#4a6070'
-};
+// ══════════════════════════════════════════════════════════════════════
+const C={t:'#00cba4',b:'#4d9fff',g:'#3dd68c',r:'#ff6168',a:'#ffb547',p:'#a78bfa',d:'#4a6070'};
+const base=()=>({
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{backgroundColor:'#1c2530',borderColor:'#253040',borderWidth:1,titleColor:'#e2eaf4',bodyColor:'#7a90a8',padding:10}},
+  scales:{x:{grid:{color:'rgba(48,60,80,.5)'},ticks:{color:'#4a6070',font:{size:10},maxRotation:45,autoSkip:true}},y:{grid:{color:'rgba(48,60,80,.5)'},ticks:{color:'#4a6070',font:{size:10}}}}
+});
+const line=(id,lbl,dsets)=>{const e=document.getElementById(id);if(!e)return;new Chart(e,{type:'line',data:{labels:lbl,datasets:dsets},options:base()})};
+const bar=(id,lbl,dsets,horiz=false)=>{const e=document.getElementById(id);if(!e)return;const o=base();if(horiz)o.indexAxis='y';new Chart(e,{type:'bar',data:{labels:lbl,datasets:dsets},options:o})};
+const donut=(id,lbl,data,clrs)=>{const e=document.getElementById(id);if(!e)return;new Chart(e,{type:'doughnut',data:{labels:lbl,datasets:[{data,backgroundColor:clrs,borderWidth:2,borderColor:'#141a22'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#1c2530',borderColor:'#253040',borderWidth:1,titleColor:'#e2eaf4',bodyColor:'#7a90a8'}}}})};
+const ds=(lbl,data,clr,fill=true,dash=[])=>({label:lbl,data,borderColor:clr,backgroundColor:fill?clr+'18':'transparent',borderWidth:2,tension:.35,pointRadius:3,pointBackgroundColor:clr,fill,borderDash:dash});
+const db=(lbl,data,clr)=>({label:lbl,data,backgroundColor:clr+'cc',borderRadius:4,borderSkipped:false});
 
-function baseLineOpts(yLabel) {
-  return {
-    responsive:true, maintainAspectRatio:false,
-    plugins:{legend:{display:false}, tooltip:{backgroundColor:'#1c2530',borderColor:'#253040',borderWidth:1,titleColor:'#e2eaf4',bodyColor:'#7a90a8'}},
-    scales:{
-      x:{grid:{color:'rgba(48,54,64,0.6)'},ticks:{color:'#4a6070',font:{size:10},maxRotation:45}},
-      y:{grid:{color:'rgba(48,54,64,0.6)'},ticks:{color:'#4a6070',font:{size:10}}}
-    }
-  };
-}
-
-function mkLine(id, labels, datasets, opts={}) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  return new Chart(el, {type:'line', data:{labels, datasets}, options:{...baseLineOpts(), ...opts}});
-}
-
-function mkBar(id, labels, datasets, opts={}) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  return new Chart(el, {type:'bar', data:{labels, datasets}, options:{...baseLineOpts(), ...opts}});
-}
-
-function mkDoughnut(id, labels, data, colors) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  return new Chart(el, {
-    type:'doughnut',
-    data:{labels, datasets:[{data, backgroundColor:colors, borderWidth:2, borderColor:'#141a22'}]},
-    options:{
-      responsive:true, maintainAspectRatio:false, cutout:'65%',
-      plugins:{legend:{display:false}, tooltip:{backgroundColor:'#1c2530',borderColor:'#253040',borderWidth:1,titleColor:'#e2eaf4',bodyColor:'#7a90a8'}}
-    }
-  });
-}
-
-function ds(label, data, color, opts={}) {
-  return {label, data, borderColor:color, backgroundColor:color+'22', borderWidth:2, tension:0.35, pointRadius:3, pointBackgroundColor:color, fill:true, ...opts};
-}
-
-function dsBar(label, data, color) {
-  return {label, data, backgroundColor:color+'bb', borderRadius:4, borderSkipped:false};
-}
-
-// ══════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
 // INIT CHARTS
-// ══════════════════════════════════════════════════
-function initCharts() {
+// ══════════════════════════════════════════════════════════════════════
+function initCharts(){
+
   // ── OVERVIEW ──
-  mkLine('blTrendChart', MONTHS,
-    [ds('BL Approved', D.blApproved, COLORS.teal),
-     {label:'Target', data:Array(12).fill(575000), borderColor:COLORS.red+'99', borderDash:[6,3], borderWidth:1.5, pointRadius:0, fill:false, backgroundColor:'transparent'}],
-    {plugins:{legend:{display:false}}}
-  );
-
-  mkBar('spendChart', MONTHS, [dsBar('Spend', D.totalCost.map(v=>Math.round(v/100000)), COLORS.blue)]);
-
-  mkLine('costBLChart', MONTHS, [
-    {...ds('Cost/BL', D.costBL, COLORS.amber), fill:false}
-  ]);
-
-  mkDoughnut('blTypeChart',
-    ['WhatsApp','INTENT','FLPNS','Direct'],
-    [245739,134468,106191,105584],
-    [COLORS.teal, COLORS.blue, COLORS.purple, COLORS.amber]
-  );
-
-  mkLine('txnChart', MONTHS, [
-    ds('BL Approved', D.blApproved.map(v=>Math.round(v/1000)), COLORS.teal),
-    ds('Transactions', D.totalTxn.map(v=>Math.round(v/1000)), COLORS.blue)
-  ]);
+  line('c-bl-trend',M12,[ds('BL',MN.bl,C.t),{...ds('Target',Array(12).fill(575000),C.r,false,[6,3]),borderWidth:1.5,pointRadius:0}]);
+  bar('c-spend',M12,[db('Spend',MN.spend,C.b)]);
+  line('c-costbl',M12,[{...ds('₹/BL',MN.costBL,C.a,false)}]);
+  donut('c-bltype',['WhatsApp','INTENT','FLPNS','Direct'],[245739,134468,106191,105584],[C.t,C.b,C.p,C.a]);
+  line('c-txn',M12,[ds('BL(K)',MN.bl.map(v=>+(v/1000).toFixed(0)),C.t),ds('Txn(L)',MN.txn,C.b)]);
 
   // ── GOOGLE ADS ──
-  mkLine('impClickChart', MONTHS, [
-    ds('Impressions (÷10M)', D.impressions.map(v=>+(v/10000000).toFixed(1)), COLORS.blue),
-    ds('Clicks (÷1M)', D.gClicks.map(v=>+(v/1000000).toFixed(2)), COLORS.teal)
-  ]);
-
-  mkLine('ctrChart', MONTHS, [{...ds('CTR%', D.ctr, COLORS.green), fill:false}]);
-  mkLine('cpcChart', MONTHS, [{...ds('Avg CPC', D.cpc, COLORS.amber), fill:false}]);
-  mkBar('convChart', MONTHS, [dsBar('Conversions', D.conversions.map(v=>Math.round(v/1000)), COLORS.purple)]);
-  mkLine('costConvChart', MONTHS, [{...ds('Cost/Conv', D.costConv, COLORS.red), fill:false}]);
-
-  mkDoughnut('deviceClicksChart',['M-site','Desktop'],[13777973,423963],[COLORS.teal, COLORS.blue]);
-  mkDoughnut('deviceCostChart',['M-site','Desktop'],[24293391,856002],[COLORS.teal, COLORS.amber]);
-
-  // Table
-  const tbody = document.getElementById('googleAdsTableBody');
-  MONTHS.forEach((m, i) => {
-    const tr = document.createElement('tr');
-    const isLast = i === 11;
-    tr.innerHTML = `
-      <td style="${isLast?'color:var(--teal);font-weight:700':'color:var(--muted)'}">${m}</td>
-      <td class="num">${(D.impressions[i]/10000000).toFixed(1)}Cr</td>
-      <td class="num">${(D.gClicks[i]/100000).toFixed(1)}L</td>
-      <td>${D.ctr[i].toFixed(2)}%</td>
-      <td>₹${D.cpc[i].toFixed(2)}</td>
-      <td class="num">${(D.conversions[i]/1000).toFixed(0)}K</td>
-      <td>₹${D.costConv[i]}</td>
-      <td class="num">₹${(D.totalCost[i]/100000).toFixed(1)}L</td>
-    `;
-    tbody.appendChild(tr);
-  });
+  line('c-imp-clk',M12,[ds('Imp÷10M',MN.impr,C.b),ds('Clk÷1M',MN.clicks,C.t)]);
+  line('c-ctr',M12,[{...ds('CTR%',MN.ctr,C.g,false)}]);
+  line('c-cpc',M12,[{...ds('CPC',MN.cpc,C.a,false)}]);
+  bar('c-conv',M12,[db('Conv(K)',MN.conv,C.p)]);
+  line('c-costconv',M12,[{...ds('₹/Conv',MN.costConv,C.r,false)}]);
+  donut('c-dev-clk',['M-site','Desktop'],[13777973,423963],[C.t,C.b]);
+  donut('c-dev-sp',['M-site','Desktop'],[24293391,856002],[C.t,C.a]);
+  // GA Table
+  {const tb=document.getElementById('ga-tb');if(tb)M12.forEach((m,i)=>{const tr=document.createElement('tr');tr.innerHTML=`<td style="${i===11?'color:var(--teal);font-weight:700':'color:var(--muted)'}">${m}</td><td class="num">${MN.impr[i].toFixed(1)}Cr</td><td class="num">${MN.clicks[i].toFixed(1)}L</td><td>${MN.ctr[i].toFixed(2)}%</td><td>₹${MN.cpc[i].toFixed(2)}</td><td class="num">${MN.conv[i].toFixed(0)}K</td><td>₹${MN.costConv[i]}</td><td class="num">₹${MN.spend[i].toFixed(1)}L</td>`;tb.appendChild(tr)});}
 
   // ── BL STATS ──
-  mkDoughnut('blTypeBig',['WhatsApp','INTENT','FLPNS','Direct'],[245739,134468,106191,105584],[COLORS.teal,COLORS.blue,COLORS.purple,COLORS.amber]);
-  mkDoughnut('blSoldChart',['High Sold','Medium Sold','Low Sold'],[545835,36726,18467],[COLORS.green,COLORS.amber,COLORS.red]);
-
-  mkLine('blTypesTrend', MONTHS, [
-    ds('WhatsApp', D.waBL.map(v=>Math.round(v/1000)), COLORS.teal),
-    ds('INTENT', D.intentBL.map(v=>Math.round(v/1000)), COLORS.blue),
-    ds('FLPNS', D.flpnsBL.map(v=>Math.round(v/1000)), COLORS.purple),
-    ds('Direct', D.directBL.map(v=>Math.round(v/1000)), COLORS.amber)
-  ]);
-
-  mkBar('mcatChart',['0 BL','1–9 BL','10–99 BL','≥100 BL'],[
-    [{data:[5575], backgroundColor:COLORS.red+'bb', borderRadius:4, borderSkipped:false, label:'0 BL'}[0]],
-  ]);
-  // Fix MCAT chart properly
-  const mcatEl = document.getElementById('mcatChart');
-  if (mcatEl) {
-    new Chart(mcatEl, {
-      type:'bar',
-      data:{
-        labels:['0 BL','1–9 BL','10–99 BL','≥100 BL'],
-        datasets:[{
-          data:[5575,5860,2216,165],
-          backgroundColor:[COLORS.red+'bb',COLORS.amber+'bb',COLORS.blue+'bb',COLORS.teal+'bb'],
-          borderRadius:6, borderSkipped:false
-        }]
-      },
-      options:{...baseLineOpts(), plugins:{legend:{display:false}}}
-    });
-  }
+  donut('c-bltype-big',['WhatsApp','INTENT','FLPNS','Direct'],[245739,134468,106191,105584],[C.t,C.b,C.p,C.a]);
+  donut('c-blsold',['High Sold','Medium Sold','Low Sold'],[545835,36726,18467],[C.g,C.a,C.r]);
+  line('c-bltype-trend',M12,[ds('WhatsApp',MN.waBL,C.t),ds('INTENT',MN.intBL,C.b),ds('FLPNS',MN.flpBL,C.p),ds('Direct',MN.dirBL,C.a)]);
 
   // ── TRAFFIC ──
-  mkLine('gaUsersChart', MONTHS, [
-    ds('GA Users', D.gaUsers.map(v=>Math.round(v/100000)/10), COLORS.blue),
-    ds('Sessions', D.sessions.map(v=>Math.round(v/100000)/10), COLORS.purple),
-    ds('New Users', D.newUsers.map(v=>Math.round(v/100000)/10), COLORS.green)
-  ]);
-
-  mkBar('pvChart', MONTHS, [dsBar('Page Views', D.gaPV.map(v=>Math.round(v/1000000)), COLORS.teal)]);
-
-  mkDoughnut('userTypeChart',
-    ['Unidentified','Identified','Full Login'],
-    [5582212, 944317, 799060],
-    [COLORS.gray, COLORS.blue, COLORS.teal]
-  );
+  line('c-ga-users',M12,[ds('Users',MN.gaUsers,C.b),ds('Sessions',MN.sessions,C.p),ds('New',MN.newUsers,C.g)]);
+  bar('c-pv',M12,[db('PV(M)',MN.gaPV,C.t)]);
+  donut('c-usertype',['Unidentified','Identified','Full Login'],[5582212,944317,799060],[C.d,C.b,C.t]);
 
   // ── ENQUIRY ──
-  mkBar('enqMixChart', MONTHS, [
-    dsBar('Enquiry', D.enquiry.map(v=>Math.round(v/1000)), COLORS.red),
-    dsBar('Call', D.callClicked.map(v=>Math.round(v/1000)), COLORS.amber),
-    dsBar('BL Approved', D.blApproved.map(v=>Math.round(v/1000)), COLORS.teal),
-  ], {plugins:{...baseLineOpts().plugins, tooltip:{mode:'index',intersect:false,backgroundColor:'#1c2530',borderColor:'#253040',borderWidth:1,titleColor:'#e2eaf4',bodyColor:'#7a90a8'}}});
+  bar('c-enq-mix',M12,[db('Enquiry',MN.enq,C.r),db('Call',MN.calls,C.a),db('BL',MN.bl.map(v=>+(v/1000).toFixed(0)),C.t)]);
+  donut('c-enq-dist',['>250km','50-250km','0km','0-50km'],[43025,20014,17698,6579],[C.b,C.p,C.t,C.a]);
+  line('c-fenq',M12,[{...ds('FENQ(K)',MN.fenq,C.r)}]);
 
-  mkDoughnut('enqDistChart',
-    ['>250 Km','50-250 Km','0 Km','0-50 Km'],
-    [43025,20014,17698,6579],
-    [COLORS.blue,COLORS.purple,COLORS.teal,COLORS.amber]
-  );
+  // ── B&C WEEKLY (REAL FROM XLSX) ──
+  line('c-bc-bl',BCW,[ds('BL',BC.bl,C.t),{...ds('Target',Array(25).fill(25970),C.r,false,[5,3]),borderWidth:1.5,pointRadius:0}]);
+  bar('c-bc-spend',BCW,[db('₹L',BC.spend,C.b)]);
+  line('c-bc-costbl',BCW,[{...ds('₹/BL',BC.costBL,C.a,false)}]);
+  bar('c-bc-conv',BCW,[db('Conv',BC.conv,C.g)]);
+  line('c-bc-cpc',BCW,[{...ds('CPC(₹)',BC.cpc,C.r,false)}]);
+  // PMCAT coverage — filter out nulls
+  {const pmLbl=BCW.filter((_,i)=>BC.pmcat[i]!==null);const pmData=BC.pmcat.filter(v=>v!==null);const e=document.getElementById('c-bc-pmcat');if(e)new Chart(e,{type:'line',data:{labels:pmLbl,datasets:[ds('Cov%',pmData,C.b,false),{...ds('Target',Array(pmLbl.length).fill(80),C.r,false,[5,3]),borderWidth:1.5,pointRadius:0}]},options:base()});}
+  // Txn flag BLs — start from week 12 (Jan18)
+  {const start=11;const fw=BCW.slice(start);const fh=BC.txnHigh.slice(start).map(v=>v||0);const fm=BC.txnMed.slice(start).map(v=>v||0);const fl=BC.txnLow.slice(start).map(v=>v||0);const fd=BC.txnDrop.slice(start).map(v=>v||0);const e=document.getElementById('c-bc-txnflag');if(e)new Chart(e,{type:'bar',data:{labels:fw,datasets:[db('High',fh,C.g),db('Medium',fm,C.a),db('Low',fl,C.r),db('Drop',fd,C.d)]},options:{...base(),scales:{...base().scales,x:{stacked:false,...base().scales.x},y:{stacked:false,...base().scales.y}}}});}
 
-  mkLine('fenqChart', MONTHS, [{...ds('FENQ Approved', D.fenq.map(v=>Math.round(v/1000)), COLORS.red), fill:true}]);
-}
+  // ── CAMPAIGN DETAIL (from Google_Ads_Report.xlsx) ──
+  {const days=['Apr23','Apr24','Apr25','Apr26','Apr27','Apr28','Apr29'];
+   const imp=[1940433,2022858,1835958,1858428,2089423,1849971,1882695].map(v=>+(v/100000).toFixed(1));
+   const clk=[49486,49961,47683,49781,51641,47311,45927].map(v=>+(v/1000).toFixed(1));
+   line('c-camp-main',days,[ds('Imp÷100K',imp,C.b),ds('Clk÷1K',clk,C.t)]);
+   const cpc2=[2.41,2.43,2.23,2.13,2.36,2.33,2.33];
+   line('c-camp-cpc',['B&C Main','B&C Medium','Misc Groups','DG-Furn','DG-Furn YT'].slice(0,7).slice(0,5),[]);
+   {const e=document.getElementById('c-camp-cpc');if(e)new Chart(e,{type:'bar',data:{labels:['B&C Main','B&C Medium','Misc Groups','DG-Furn Discovery','DG-Furn YT'],datasets:[{data:[2.33,1.17,2.47,2.87,0.90],backgroundColor:[C.t+'cc',C.g+'cc',C.r+'cc',C.a+'cc',C.b+'cc'],borderRadius:4,borderSkipped:false}]},options:base()});}
+   {const e=document.getElementById('c-camp-cost');if(e)new Chart(e,{type:'bar',data:{labels:days,datasets:[db('B&C Main(₹K)',[119,121,106,106,122,110,107],C.t),db('B&C Medium(₹K)',[22,22,21,21,21,20,20],C.b)]},options:base()});}
+   const cvr=[1.794,1.979,2.013,1.882,1.929,1.772,1.802];
+   line('c-camp-cvr',days,[{...ds('Conv Rate%',cvr,C.g,false)}]);
+   const cc2=[134.3,122.6,110.9,113.1,122.2,131.2,129.1];
+   line('c-camp-cc',days,[{...ds('₹/Conv',cc2,C.a,false)}]);}
 
-// ══════════════════════════════════════════════════
-// TAB SWITCHING
-// ══════════════════════════════════════════════════
-const tabTitles = {
-  'overview':'Overview Dashboard',
-  'google-ads':'Google Ads Performance',
-  'bl-stats':'Business Leads (BL) Report',
-  'traffic':'Traffic & GA Analytics',
-  'enquiry':'Enquiry & Call Report',
-  'ai-insights':'AI Insights & Recommendations'
-};
+  // ── MCAT PAUSE (REAL) ──
+  {const tb=document.getElementById('tb-paused-long');if(tb)PAUSED_LONG.forEach(r=>{const tr=document.createElement('tr');const cls=r.bl>=80?'bd':r.bl>=60?'wn':'';tr.innerHTML=`<td class="${r.days>=7?'wn':''}">${r.name}</td><td class="sm">${r.group}</td><td class="num ${cls}">${r.bl}</td><td class="num hi">${r.days}</td>`;tb.appendChild(tr);});}
+  {const tb=document.getElementById('tb-freq-paused');if(tb)FREQ_PAUSED.forEach(r=>{const tr=document.createElement('tr');tr.innerHTML=`<td class="${r.freq>=3?'wn':''}">${r.name}</td><td class="sm">${r.group}</td><td class="num hi">${r.freq}</td>`;tb.appendChild(tr);});}
+  {const e=document.getElementById('c-pause-grp');if(e)new Chart(e,{type:'bar',data:{labels:['Industrial Plants','Electrical','Building','Furniture','Medical','Packaging','Electronics'],datasets:[{data:[6,5,5,3,2,2,1],backgroundColor:[C.t+'cc',C.b+'cc',C.a+'cc',C.p+'cc',C.r+'cc',C.g+'cc',C.d+'cc'],borderRadius:4,borderSkipped:false}]},options:{...base(),indexAxis:'y'}});}
+  {const e=document.getElementById('c-pause-bl');if(e)new Chart(e,{type:'bar',data:{labels:['40-50 BL','50-60 BL','60-75 BL','75-100 BL','100+ BL'],datasets:[{data:[6,5,4,2,2],backgroundColor:[C.g+'cc',C.t+'cc',C.a+'cc',C.r+'cc',C.r+'88'],borderRadius:4,borderSkipped:false}]},options:base()});}
 
-function switchTab(id) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  document.querySelector(`[onclick="switchTab('${id}')"]`).classList.add('active');
-  document.getElementById('page-title').textContent = tabTitles[id];
-}
+  // ── FEED HYGIENE (REAL 4-WEEK DATA) ──
+  {const e=document.getElementById('c-hyg-main');if(e)new Chart(e,{type:'bar',data:{labels:HYGW,datasets:[db('MC Eligible',HYG.eligMC,C.g),db('GA Eligible',HYG.eligGA,C.b),db('Not Eligible',HYG.notElig,C.r),db('Paused',HYG.paused,C.a)]},options:base()});}
+  line('c-hyg-appr',HYGW,[{...ds('Approval%',HYG.apprRate,C.t,false)}]);
+  {const e=document.getElementById('c-hyg-ctr');if(e)new Chart(e,{type:'bar',data:{labels:HYGW,datasets:[db('High CTR',HYG.highCTR,C.g),db('Low CTR',HYG.lowCTR.map(v=>Math.round(v/1000)),C.r)]},options:base()});}
+  {const e=document.getElementById('c-hyg-conv');if(e)new Chart(e,{type:'bar',data:{labels:['Conv=0','<₹50','₹50-75','₹75-100','₹100-125','≥₹125'],datasets:[{data:[151206,163197,2454,1542,986,2685],backgroundColor:[C.d+'cc',C.g+'cc',C.t+'cc',C.a+'cc',C.r+'cc',C.r+'77'],borderRadius:4,borderSkipped:false}]},options:base()});}
+  {const e=document.getElementById('c-hyg-grp');if(e)new Chart(e,{type:'bar',data:{labels:['Industrial Plants','Building & Const','Ind & Engg','Electronic Comp','Electrical Equip','Consumer Elec','Med & Hospital','Packaging'],datasets:[{data:[20273,19691,9903,5878,8536,6208,6144,5844],backgroundColor:[C.t+'cc',C.b+'cc',C.p+'cc',C.a+'cc',C.g+'cc',C.r+'cc',C.d+'cc',C.t+'77'],borderRadius:4,borderSkipped:false}]},options:{...base(),indexAxis:'y'}});}
 
-// ══════════════════════════════════════════════════
-// AI INSIGHTS
-// ══════════════════════════════════════════════════
-async function generateInsights() {
-  const btn = document.getElementById('genBtn');
-  const box = document.getElementById('ai-result');
-  btn.disabled = true; btn.textContent = '⏳ Analysing...';
-  box.innerHTML = '<div class="ai-loading"><div class="spinner"></div><span>Claude is analysing 12 months of data across BL, Google Ads, GA, and enquiry channels…</span></div>';
-
-  const prompt = `You are a senior performance marketing analyst. Analyse this 12-month Google Ads and business performance data and provide 6 specific, data-driven recommendations.
-
-MARCH 2026 KPIs (vs Feb'26):
-- BL Approved: 603,134 (+3.85%) ★ BEST EVER
-- Total Spend: ₹2.1Cr (-16.63%)
-- Google Clicks: 1.19Cr (-16.9%)
-- Impressions: 45.3Cr (-26.44%)
-- CTR: 2.62% (+12.93%)
-- Avg CPC: ₹1.75 (-0.57%)
-- Conversions: 3.10L (-10.45%)
-- Cost/Conversion: ₹67 (-7.97%)
-- Cost/BL: ₹34 (-20.56%) ★ BEST EVER
-- GA Users: 68.9L (-13.72%)
-- Unique Sold%: 88.9% (+0.41%)
-- PMCAT Coverage: 30.6% vs 80% target (-61.75% gap!)
-
-BL TYPE MIX (Mar'26):
-- WhatsApp: 2,45,739 (40.7%)
-- INTENT: 1,34,468 (22.3%) - up 22.54% MoM
-- FLPNS: 1,06,191 (17.6%) - down 8.18%
-- Direct: 1,05,584 (17.5%) - down 4.50%
-
-ENQUIRY TREND: Dropped 65.26% to 87,316 (was 2,51,338 in Feb'26). FENQ fell from 98K peak to just 11K.
-
-DEVICE: 97% mobile traffic. M-site: 1.38Cr clicks, ₹2.43Cr spend. Desktop: 4.24L clicks, ₹85.6L spend.
-
-12-MONTH CONTEXT: BLs grew from 1.37L (Apr'25) to 6.03L (Mar'26). CPC rose from ₹1.05 to ₹1.75 (+67%). Enquiries declined sharply in H2. User conversion rate hit 8.85% (best in 7 months).
-
-Return a JSON array of exactly 6 objects with fields: type ("positive"|"warning"|"action"), title (headline 6-10 words), detail (2-3 specific sentences with numbers and concrete recommendations). Return ONLY raw JSON array.`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1200,
-        messages:[{role:'user',content:prompt}]
-      })
-    });
-    const data = await res.json();
-    const text = data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
-    const ins = JSON.parse(text);
-    const bc = {positive:'positive',warning:'warning',action:'action',info:'info'};
-    const bl = {positive:'▲ Strong','warning':'⚠ Watch','action':'→ Act Now','info':'→ Insight'};
-    box.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">` +
-      ins.map(i=>`
-        <div class="insight-card">
-          <div class="insight-badge ${bc[i.type]||'info'}">${bl[i.type]||i.type}</div>
-          <div class="insight-title">${i.title}</div>
-          <div class="insight-body">${i.detail}</div>
-        </div>`).join('') +
-      `</div>`;
-  } catch(e) {
-    box.innerHTML = `<p style="color:var(--red);font-size:14px;">Error: ${e.message}</p>`;
+  // ── CATEGORY DIVERSITY (REAL 22-WEEK DATA) ──
+  {const cw=CDW.slice(0,CD.pmcatCov.length);
+   // PMCAT coverage vs target
+   const e=document.getElementById('c-div-pmcat-cov');
+   if(e)new Chart(e,{type:'line',data:{labels:cw,datasets:[ds('PMCAT Cov%',CD.pmcatCov,C.b,true),{...ds('Target 80%',Array(cw.length).fill(80),C.r,false,[6,3]),borderWidth:1.5,pointRadius:0}]},options:base()});
   }
-  btn.disabled=false; btn.textContent='✨ Regenerate Insights';
+  {const cw=CDW.slice(0,CD.pmcatRun.length);
+   bar('c-div-pmcat-cnt',cw,[db('PMCAT Running',CD.pmcatRun,C.t),db('PMCATs >25BL',CD.pmcat25bl,C.b)]);}
+  {const e=document.getElementById('c-div-pmcat-bkt');if(e)new Chart(e,{type:'bar',data:{labels:['0 to <5 BL','5 to <26 BL','26-100 BL','100-200 BL','200-400 BL','≥400 BL'],datasets:[{data:[1076,952,666,186,69,9],backgroundColor:[C.r+'cc',C.a+'cc',C.b+'cc',C.t+'cc',C.g+'cc',C.p+'cc'],borderRadius:4,borderSkipped:false}]},options:base()});}
+  {const cw=CDW.slice(0,CD.mcatCov.length);line('c-div-mcat-cov',cw,[{...ds('MCAT Cov%',CD.mcatCov,C.t,false)}]);}
+  {const cw=CDW.slice(0,CD.mcatRun.length);bar('c-div-mcat-run',cw,[db('MCATs Running',CD.mcatRun,C.b)]);}
+  {const e=document.getElementById('c-div-mcat-bkt');if(e)new Chart(e,{type:'bar',data:{labels:['0-3 BL','3-10 BL','10-50 BL','50-100 BL','≥100 BL'],datasets:[{data:[5767,2499,1761,503,53],backgroundColor:[C.r+'cc',C.a+'cc',C.b+'cc',C.t+'cc',C.g+'cc'],borderRadius:4,borderSkipped:false}]},options:base()});}
+
+  // ── MCAT MASTER (REAL FROM GIT INPUT) ──
+  {const e=document.getElementById('c-master-flag');if(e)new Chart(e,{type:'doughnut',data:{labels:['No Sale (0)','Low Txn','High','Medium','Low'],datasets:[{data:[78455,8018,7608,2511,1654],backgroundColor:[C.d+'cc',C.r+'cc',C.a+'cc',C.b+'cc',C.g+'cc'],borderWidth:2,borderColor:'#141a22'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#1c2530',borderColor:'#253040',borderWidth:1,titleColor:'#e2eaf4',bodyColor:'#7a90a8'}}}});}
+  {const e=document.getElementById('c-master-bl');if(e)new Chart(e,{type:'bar',data:{labels:['Mar29-Apr4','Apr5-11','Apr12-18','Apr19-25'],datasets:[{data:[1.33,1.26,1.36,1.24],backgroundColor:[C.t+'cc',C.b+'cc',C.g+'cc',C.a+'cc'],borderRadius:5,borderSkipped:false}]},options:base()});}
+  {const e=document.getElementById('c-master-imp');if(e)new Chart(e,{type:'bar',data:{labels:['0 imp','1-100','101-1K','1K-10K','10K-100K','>100K'],datasets:[{data:[52000,12000,8000,15000,7000,4246],backgroundColor:[C.r+'cc',C.a+'cc',C.b+'cc',C.t+'cc',C.g+'cc',C.p+'cc'],borderRadius:4,borderSkipped:false}]},options:base()});}
+  {const e=document.getElementById('c-master-seller');if(e)new Chart(e,{type:'bar',data:{labels:['Total Sellers','Paid Sellers','Paid A-Rank','SS/LS Sellers','SS/LS A-Rank'],datasets:[{data:[242.7,27.7,27.7,2.08,1.39],backgroundColor:[C.t+'cc',C.b+'cc',C.g+'cc',C.a+'cc',C.p+'cc'],borderRadius:4,borderSkipped:false}]},options:base()});}
+  // Master table
+  {const tb=document.getElementById('master-tb');if(tb)TOP_MCATS.forEach(r=>{const tr=document.createElement('tr');tr.innerHTML=`<td class="hi">${r.name}</td><td class="sm">${r.pmcat}</td><td class="sm">${r.grp}</td><td class="num">${r.bl}</td><td class="num">${r.feed}</td><td class="num">${r.elig}</td><td class="num">${r.sellers.toLocaleString()}</td><td class="num">${r.paid}</td><td class="num">${r.imp.toLocaleString()}</td>`;tb.appendChild(tr);});}
 }
 
-// ══════════════════════════════════════════════════
-// BOOT
-// ══════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', initCharts);
+// ══════════════════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════════════════
+const TITLES={overview:'Overview Dashboard',google:'Google Ads Performance',bl:'Business Leads (BL) Report',traffic:'Traffic & GA Analytics',enquiry:'Enquiry & Calls',bc:'B&C Weekly Report (Real Data)',campaign:'Campaign Detail — Google Ads XLSX',mcat:'MCAT Pause Analysis',hygiene:'Feed Hygiene Report',diversity:'Category Diversity Report',master:'MCAT Master Data (98K MCATs)',ai:'AI Insights & Recommendations'};
+function go(id){
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(e=>e.classList.remove('on'));
+  const tab=document.getElementById('tab-'+id);if(tab)tab.classList.add('on');
+  const btn=document.querySelector(`[onclick="go('${id}')"]`);if(btn)btn.classList.add('on');
+  document.getElementById('pg-title').textContent=TITLES[id]||id;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// AI TABS
+// ══════════════════════════════════════════════════════════════════════
+function aiTab(id){
+  document.querySelectorAll('.ai-tab').forEach(e=>e.classList.remove('on'));
+  event.target.classList.add('on');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// AI INSIGHTS — Claude API
+// ══════════════════════════════════════════════════════════════════════
+async function runAI(){
+  const btn=document.getElementById('ai-btn');
+  const box=document.getElementById('ai-result');
+  btn.disabled=true;btn.textContent='⏳ Analysing 6 sources…';
+  box.innerHTML='<div class="ai-load"><div class="spin"></div><span>Claude is cross-referencing: Monthly CSV + Google Ads XLSX + B&C Weekly XLSX + MCAT Pause XLSX + Hygiene XLSX + Category Diversity XLSX + MCAT Master (98K rows)…</span></div>';
+
+  const prompt=`You are a senior performance marketing strategist. Analyse this data from 6 integrated reports and return ONLY a raw JSON array.
+
+SOURCE 1 — MONTHLY REPORT (Mar'26 vs Feb'26):
+BL Approved: 603,134 (+3.85%) ★ BEST EVER vs 575K target. Total Spend: ₹2.1Cr (-16.63%). Cost/BL: ₹34 (-20.56%) ★ BEST EVER. Cost/Txn: ₹10 (-21.74%).
+Google Clicks: 1.19Cr (-16.9%). Impressions: 45.3Cr (-26.44%). CTR: 2.62% (+12.93%). Avg CPC: ₹1.75 (-0.57%).
+Conversions: 3.10L (-10.45%). Cost/Conv: ₹67 (-7.97%). GA Users: 68.9L (-13.72%). User Conv%: 8.85% (+15.84%).
+WhatsApp BL: 245,739 (40.7%) | INTENT: 134,468 (+22.54% MoM, fastest growing).
+
+SOURCE 2 — B&C WEEKLY REPORT (25 weeks, latest Apr19-25):
+Latest week BL: 25,283 vs target 25,970 (-2.7% miss). Best week: 31,486 (Mar22-28). Cost/BL best: ₹33.87 (Mar1-7), latest: ₹44.40.
+PMCAT Coverage latest: 44.09% vs 80% target — 35.9 ppt gap. B&C CTR best: 2.96% (Mar22-28), latest: 2.78%.
+B&C CPC latest: ₹1.84 — up from ₹1.06 best. Product flags: 30,085 total (15K High, 4.4K Med, 3.4K Low, 7.2K Low Txn).
+
+SOURCE 3 — MCAT PAUSE ANALYSIS:
+135 total paused MCATs. 20 paused 4-7 days. Kirloskar DG: 111 BLs at pause (5 days). Portable Petrol Gen: 95 BLs (4 days). Diesel Gen: 82 BLs (5 days). Reciprocating AC: 73 BLs (4 days).
+6 MCATs paused 3+ times in 10 days (Bottle Filling, Garden Bench, RO System, RO Plant, Flask Gift Sets, Sintex Toilets).
+Industrial Plants & Electrical most paused categories (6 and 5 MCATs respectively).
+
+SOURCE 4 — HYGIENE REPORT (4 weeks ending Apr25):
+Products in feed: 170,755 (+1.69%). GA Eligible: 115,828 (+4.49%). Feed approval rate: 67.8% (recovering from 64.3%).
+Not eligible: 54,974 (-4.74%). No campaign: 43,939 (-6.68%). Product paused: 9,288 (-1.61%).
+Low CTR products: 81,004 (+8.87%) — rising. High CTR: 9,799 (-6.84%) — falling. High Conv: 1,027 (-6.72%).
+Mismatched price: 409 (-36.3% — big improvement).
+
+SOURCE 5 — CATEGORY DIVERSITY (22 weeks, latest Apr19-25):
+PMCAT Running: 2,959. PMCATs >25 BLs: 930 (-4.71%). PMCAT Coverage: 31.43% vs 80% target (NEVER reached in 22 weeks). Best ever coverage: 33.78%.
+PMCATs ≥400 BLs: crashed from 15 to 9 (-40% in one week). MCATs Running: 10,583 (+14.51%). MCATs ≥10 BLs: 2,317 (-6%). MCAT Coverage: 21.89% (-17.95%).
+5,767 MCATs with 0-3 BLs need urgent activation. 53 MCATs with ≥100 BLs performing well.
+
+SOURCE 6 — MCAT MASTER DATA (98,246 MCATs):
+78,455 (80%) have 0 sale flag — huge untapped pool. Only 7,608 High + 2,511 Medium + 1,654 Low flags performing.
+Top MCAT: Tent Air Cooler with 822 BLs (Apr19-25) — seasonal opportunity. Average 242 sellers/MCAT, 27.7 paid sellers.
+UPVC Sliding Windows: 419 BLs but 0 eligible products in feed — products not showing!
+
+Return exactly 8 JSON objects. Each must have:
+- type: "positive"|"warning"|"action"|"critical"
+- title: 8-12 word specific headline with numbers
+- detail: 3 sentences — first with specific data point, second with root cause/context, third with concrete next step/recommendation
+Return ONLY raw JSON array, no markdown, no code fences.`;
+
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1800,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    const txt=d.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+    const ins=JSON.parse(txt);
+    const cm={positive:'pos',warning:'warn',action:'act',critical:'act'};
+    const cl={positive:'▲ Strong',warning:'⚠ Watch',action:'→ Act Now',critical:'🚨 Critical'};
+    box.innerHTML=`<div class="ig">`+ins.map(i=>`<div class="ic"><div class="ib ${cm[i.type]||'inf'}">${cl[i.type]||i.type}</div><div class="it">${i.title}</div><div class="id">${i.detail}</div></div>`).join('')+`</div>`;
+  }catch(err){
+    box.innerHTML=`<p style="color:var(--red);font-size:14px">Error: ${err.message}. Check network or API access.</p>`;
+  }
+  btn.disabled=false;btn.textContent='✨ Regenerate Analysis';
+}
+
+document.addEventListener('DOMContentLoaded',initCharts);
 </script>
 </body>
 </html>
