@@ -194,6 +194,24 @@
       }
     }
 
+    /* MODAL STYLES */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(4px); }
+    .modal-overlay.show { display: flex; }
+    .modal-content { background: var(--surf); border: 1px solid var(--bdr); border-radius: 12px; width: 600px; max-width: 90%; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: modalIn 0.3s ease-out; }
+    @keyframes modalIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--bdr2); display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h3 { margin: 0; font-size: 16px; color: var(--teal); }
+    .close-btn { background: none; border: none; color: var(--muted); font-size: 24px; cursor: pointer; transition: color 0.2s; }
+    .close-btn:hover { color: var(--red); }
+    .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+
+    .hyg-action { margin-bottom: 10px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.03); border-left: 3px solid var(--red); }
+    .hyg-action.warn { border-left-color: var(--amber); }
+    .hyg-action.info { border-left-color: var(--blue); }
+    .hyg-action-tag { font-size: 9px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+    .hyg-action-title { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+    .hyg-action-body { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
     .layout {
       display: flex;
       min-height: 100vh
@@ -1874,9 +1892,27 @@
             </div>
             <div class="cc">
               <div class="ct">BL Level at Time of Pause</div>
-              <div class="cs">Distribution of BLs when paused</div>
+              <div class="cs">Click bars to see MCAT list</div>
               <div class="cw" style="height:220px"><canvas id="c-pause-bl"></canvas></div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MCAT DRILLDOWN MODAL -->
+      <div id="mcat-modal" class="modal-overlay" onclick="closeMcatModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h3 id="modal-title">MCAT List</h3>
+            <button class="close-btn" onclick="closeMcatModal()">×</button>
+          </div>
+          <div class="modal-body">
+            <table class="dt">
+              <thead>
+                <tr><th>MCAT Name</th><th>Category</th><th>BL at Pause</th></tr>
+              </thead>
+              <tbody id="modal-tbody"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -1884,38 +1920,55 @@
       <!-- ══════════════ FEED HYGIENE ══════════════ -->
       <div id="tab-hygiene" class="tab">
         <div class="cnt">
-          <!-- Header row with title + top 3 actions top-right -->
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:20px">
+          <div style="margin-bottom:18px">
+            <div style="font-size:16px;font-weight:700;color:var(--txt);margin-bottom:3px">Feed Health Summary</div>
+            <div style="font-size:12px;color:var(--muted)">hygiene_report.xlsx · 4 weeks Mar 29 – Apr 25, 2026</div>
+          </div>
+
+          <div style="display:flex; align-items:flex-start; gap:24px; margin-bottom:22px">
             <div style="flex:1">
-              <div style="font-size:16px;font-weight:700;color:var(--txt);margin-bottom:3px">Feed Health Summary</div>
-              <div style="font-size:12px;color:var(--muted)">hygiene_report.xlsx · 4 weeks Mar 29 – Apr 25, 2026</div>
+              <div class="kg" style="margin-bottom:0">
+                <div class="kc">
+                  <div class="kl">Products in Feed (Apr 19-25)</div>
+                  <div class="kv">1,70,755</div><span class="badge up">▲ 1.69%</span>
+                  <div class="ks">Best ever: 5,79,884</div>
+                </div>
+                <div class="kc">
+                  <div class="kl">MC Eligible Products</div>
+                  <div class="kv">1,66,101</div><span class="badge up">▲ 1.37%</span>
+                  <div class="ks">97.2% eligibility rate</div>
+                </div>
+                <div class="kc">
+                  <div class="kl">GA Eligible Products</div>
+                  <div class="kv">1,15,828</div><span class="badge up">▲ 4.49%</span>
+                  <div class="ks">vs 1,10,850 week prior</div>
+                </div>
+                <div class="kc">
+                  <div class="kl">Approval Rate</div>
+                  <div class="kv">67.8%</div><span class="badge up">▲ 2.05%</span>
+                  <div class="ks">Target: 95%</div>
+                </div>
+              </div>
             </div>
+            
             <!-- ★ TOP 3 ACTION INSIGHTS ★ -->
-            <div style="width:340px;flex-shrink:0">
-              <div
-                style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">
-                ⚡ Top 3 Actions Today</div>
+            <div style="width:360px; flex-shrink:0; background:var(--surf); border:1px solid var(--bdr); border-radius:var(--r); padding:16px">
+              <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">⚡ Top 3 Actions Today</div>
               <div class="hyg-actions">
                 <div class="hyg-action">
                   <div class="hyg-action-tag">🚨 Act Now — CTR Crisis</div>
                   <div class="hyg-action-title">Fix 81K Low-CTR Products</div>
-                  <div class="hyg-action-body">Low CTR products hit <strong>81,004 (+8.87%)</strong> while high CTR fell
-                    to <strong>9,799 (▼6.84%)</strong>. Audit titles &amp; images for the top 5K worst-CTR products —
-                    prioritise Industrial Plants and B&amp;C groups first.</div>
+                  <div class="hyg-action-body">Audit titles & images for the top 5K worst-CTR products — prioritize Industrial Plants and B&C.</div>
                 </div>
                 <div class="hyg-action warn">
                   <div class="hyg-action-tag">⚠ Today — Feed Gaps</div>
-                  <div class="hyg-action-title">Activate 43,939 Products with No Campaign</div>
-                  <div class="hyg-action-body">43,939 GA-eligible products have no campaign ads (▼6.68% improving but
-                    still critical). Map these to existing campaigns or create catch-all shopping groups by category.
-                  </div>
+                  <div class="hyg-action-title">Activate 43,939 Products</div>
+                  <div class="hyg-action-body">GA-eligible products with no campaign ads. Map these to existing campaigns or create catch-all groups.</div>
                 </div>
                 <div class="hyg-action info">
                   <div class="hyg-action-tag">📈 Opportunity</div>
-                  <div class="hyg-action-title">Scale High-Conv Products (1,027 available)</div>
-                  <div class="hyg-action-body">Only <strong>1,027 products</strong> drive high conversions (▼6.72%).
-                    Increase bids for these by 20–30% and clone their feed attributes to the nearest 5K similar-category
-                    products.</div>
+                  <div class="hyg-action-title">Scale High-Conv Products</div>
+                  <div class="hyg-action-body">1,027 products drive high conversions. Increase bids by 20–30% and clone attributes.</div>
                 </div>
               </div>
             </div>
@@ -2490,8 +2543,21 @@
         if (tb1 && !tb1.childElementCount) PAUSED_LONG.forEach(r => { const tr = document.createElement('tr'); const cls = r.bl >= 80 ? 'bd' : r.bl >= 60 ? 'wn' : ''; tr.innerHTML = `<td class="${r.days >= 7 ? 'wn' : ''}">${r.name}</td><td class="sm">${r.group}</td><td class="num ${cls}">${r.bl}</td><td class="num hi">${r.days}</td>`; tb1.appendChild(tr); });
         const tb2 = document.getElementById('tb-freq-paused');
         if (tb2 && !tb2.childElementCount) FREQ_PAUSED.forEach(r => { const tr = document.createElement('tr'); tr.innerHTML = `<td class="${r.freq >= 3 ? 'wn' : ''}">${r.name}</td><td class="sm">${r.group}</td><td class="num hi">${r.freq}</td>`; tb2.appendChild(tr); });
+        
         bar('c-pause-grp', ['Industrial Plants', 'Electrical', 'Building', 'Furniture', 'Medical', 'Packaging', 'Electronics'], [{ data: [6, 5, 5, 3, 2, 2, 1], backgroundColor: [C.t + 'cc', C.b + 'cc', C.a + 'cc', C.p + 'cc', C.r + 'cc', C.g + 'cc', C.d + 'cc'], borderRadius: 4, borderSkipped: false }], true);
-        bar('c-pause-bl', ['40-50 BL', '50-60 BL', '60-75 BL', '75-100 BL', '100+ BL'], [{ data: [6, 5, 4, 2, 2], backgroundColor: [C.g + 'cc', C.t + 'cc', C.a + 'cc', C.r + 'cc', C.r + '88'], borderRadius: 4, borderSkipped: false }]);
+        
+        const bChart = mkChart('c-pause-bl', 'bar', ['40-50 BL', '50-60 BL', '60-75 BL', '75-100 BL', '100+ BL'], [{ data: [6, 5, 4, 2, 2], backgroundColor: [C.g + 'cc', C.t + 'cc', C.a + 'cc', C.r + 'cc', C.r + '88'], borderRadius: 4, borderSkipped: false }], {
+          onClick: (evt, elements) => {
+            if (elements.length > 0) {
+              const idx = elements[0].index;
+              const label = evt.chart.data.labels[idx];
+              openMcatModal(label);
+            }
+          }
+        });
+      }
+      if (id === 'campaign') {
+        loadCampaign();
       }
       if (id === 'hygiene') {
         bar('c-hyg-main', HYGW, [db('MC Eligible', HYG.eligMC, C.g), db('GA Eligible', HYG.eligGA, C.b), db('Not Eligible', HYG.notElig, C.r), db('Paused', HYG.paused, C.a)]);
@@ -2822,75 +2888,119 @@
         <div><div class="bn-val" style="color:${isDown ? 'var(--red)' : 'var(--green)'}">${cd.delta.bl}</div><div class="bn-lbl">BL vs LW</div></div>
         <div><div class="bn-val" style="color:var(--teal)">${cd.blBest.toLocaleString()}</div><div class="bn-lbl">Best Ever BL</div></div>
       </div>`;
-
-        // Deltas
         renderDeltas(cd);
-
-        // KPI cards
-        const dc = (v, inv = false) => { if (!v || v === 'N/A') return 'neu'; const n = parseFloat(v); if (isNaN(n)) return 'neu'; return inv ? (n > 0 ? 'ub' : 'dg') : (n > 0 ? 'up' : 'dg'); };
-        document.getElementById('camp-kpis').innerHTML = `
-      <div class="kc ${cd.bl[last] === cd.blBest ? 'best' : ''}"><div class="kl">BL Approved</div><div class="kv">${cd.bl[last].toLocaleString()}</div><span class="badge ${dc(cd.delta.bl)}">${cd.delta.bl}</span><div class="ks">Best: ${cd.blBest.toLocaleString()}</div></div>
-      <div class="kc ${cd.costBL[last] === cd.costBLBest ? 'best' : ''}"><div class="kl">Cost / BL</div><div class="kv">₹${cd.costBL[last]}</div><span class="badge ${dc(cd.delta.costBL, true)}">${cd.delta.costBL}</span><div class="ks">Best: ₹${cd.costBLBest}</div></div>
-      <div class="kc"><div class="kl">Weekly Spend</div><div class="kv">₹${cd.spend[last].toFixed(1)}K</div><span class="badge ${dc(cd.delta.spend, true)}">${cd.delta.spend}</span></div>
-      <div class="kc"><div class="kl">Impressions</div><div class="kv">${cd.impr[last].toFixed(1)}M</div><span class="badge neu">Latest</span></div>
-      <div class="kc"><div class="kl">Clicks</div><div class="kv">${cd.clicks[last].toFixed(1)}K</div><span class="badge neu">Latest</span></div>
-      <div class="kc"><div class="kl">CTR</div><div class="kv">${cd.ctr[last].toFixed(2)}%</div><span class="badge ${dc(cd.delta.ctr)}">${cd.delta.ctr}</span></div>
-      <div class="kc"><div class="kl">Avg CPC</div><div class="kv">₹${cd.cpc[last].toFixed(2)}</div><span class="badge ${dc(cd.delta.cpc, true)}">${cd.delta.cpc}</span></div>
-      <div class="kc"><div class="kl">Conversions</div><div class="kv">${Math.round(cd.conv[last]).toLocaleString()}</div><span class="badge ${dc(cd.delta.conv)}">${cd.delta.conv}</span></div>
-      <div class="kc"><div class="kl">Cost/Conv</div><div class="kv">₹${cd.costConv[last].toFixed(1)}</div><span class="badge ${dc(cd.delta.costConv, true)}">${cd.delta.costConv}</span></div>
-      <div class="kc"><div class="kl">PMCAT Coverage</div><div class="kv">${cd.pmcatCov[last] != null ? cd.pmcatCov[last].toFixed(1) + '%' : 'N/A'}</div><span class="badge neu">Latest</span><div class="ks">Target: 80%</div></div>
-      <div class="kc"><div class="kl">Txn %</div><div class="kv">${cd.txnPct[last].toFixed(1)}%</div><span class="badge up">Latest</span></div>
-      <div class="kc"><div class="kl">Budget Used</div><div class="kv">${cd.budgetPct[last] != null ? cd.budgetPct[last].toFixed(1) + '%' : 'N/A'}</div><span class="badge neu">of ${cd.budget}</span></div>`;
-
+        renderKPIs(cd);
         document.getElementById('tbl-sub').textContent = `${cd.name} — all metrics by week`;
         document.getElementById('ai-camp-sub').textContent = `${cd.name} — ${cd.latestWeek}`;
         document.getElementById('camp-ai-result').innerHTML = `<p style="color:var(--muted);font-size:14px">Click "Analyse This Campaign" for Claude's analysis of <strong style="color:var(--txt)">${cd.name}</strong>.</p>`;
       }
 
-      // Destroy old charts
-      Object.values(cpCharts).forEach(c => { try { c.destroy(); } catch (e) { } });
-      cpCharts = {};
+      renderTable(cd);
+      updateWeeklyCharts(cd);
+    }
 
-      const mk = (id, type, lbl, dsets, opts = {}) => { const e = document.getElementById(id); if (!e) return null; if (e._chart) e._chart.destroy(); const c = new Chart(e, { type, data: { labels: lbl, datasets: dsets }, options: { ...base(), ...opts } }); e._chart = c; cpCharts[id] = c; return c; };
-      const L = (lbl, data, clr, fill = false) => ({ label: lbl, data, borderColor: clr, backgroundColor: fill ? clr + '18' : 'transparent', borderWidth: 2, tension: .35, pointRadius: 3, pointBackgroundColor: clr, fill });
-      const B = (lbl, data, clr) => ({ label: lbl, data, backgroundColor: clr + 'cc', borderRadius: 4, borderSkipped: false });
+    function renderKPIs(cd) {
+      const last = cd.weeks.length - 1;
+      const dc = (v, inv = false) => { 
+        if (!v || v === 'N/A' || v === '0.00%') return 'neu'; 
+        const n = parseFloat(v); 
+        if (isNaN(n)) return 'neu'; 
+        return inv ? (n > 0 ? 'ub' : 'dg') : (n > 0 ? 'up' : 'dg'); 
+      };
+      
+      document.getElementById('camp-kpis').innerHTML = `
+        <div class="kc ${cd.bl[last] === cd.blBest ? 'best' : ''}"><div class="kl">BL Approved</div><div class="kv">${cd.bl[last].toLocaleString()}</div><span class="badge ${dc(cd.delta.bl)}">${cd.delta.bl}</span><div class="ks">Best: ${cd.blBest.toLocaleString()}</div></div>
+        <div class="kc ${cd.costBL[last] === cd.costBLBest ? 'best' : ''}"><div class="kl">Cost / BL</div><div class="kv">₹${cd.costBL[last].toFixed(1)}</div><span class="badge ${dc(cd.delta.costBL, true)}">${cd.delta.costBL}</span><div class="ks">Best: ₹${cd.costBLBest}</div></div>
+        <div class="kc"><div class="kl">Weekly Spend</div><div class="kv">₹${cd.spend[last].toFixed(1)}K</div><span class="badge ${dc(cd.delta.spend, true)}">${cd.delta.spend}</span></div>
+        <div class="kc"><div class="kl">Impressions</div><div class="kv">${cd.impr[last].toFixed(1)}M</div><span class="badge neu">Latest</span></div>
+        <div class="kc"><div class="kl">Clicks</div><div class="kv">${cd.clicks[last].toFixed(1)}K</div><span class="badge neu">Latest</span></div>
+        <div class="kc"><div class="kl">CTR</div><div class="kv">${cd.ctr[last].toFixed(2)}%</div><span class="badge ${dc(cd.delta.ctr)}">${cd.delta.ctr}</span></div>
+        <div class="kc"><div class="kl">Avg CPC</div><div class="kv">₹${cd.cpc[last].toFixed(2)}</div><span class="badge ${dc(cd.delta.cpc, true)}">${cd.delta.cpc}</span></div>
+        <div class="kc"><div class="kl">Conversions</div><div class="kv">${Math.round(cd.conv[last]).toLocaleString()}</div><span class="badge ${dc(cd.delta.conv)}">${cd.delta.conv}</span></div>
+        <div class="kc"><div class="kl">Cost/Conv</div><div class="kv">₹${cd.costConv[last].toFixed(1)}</div><span class="badge ${dc(cd.delta.costConv, true)}">${cd.delta.costConv}</span></div>
+        <div class="kc"><div class="kl">PMCAT Coverage</div><div class="kv">${cd.pmcatCov[last] != null ? cd.pmcatCov[last].toFixed(1) + '%' : 'N/A'}</div><span class="badge neu">Latest</span><div class="ks">Target: 80%</div></div>
+        <div class="kc"><div class="kl">Txn %</div><div class="kv">${cd.txnPct[last].toFixed(1)}%</div><span class="badge up">Latest</span></div>
+        <div class="kc"><div class="kl">Budget Used</div><div class="kv">${cd.budgetPct[last] != null ? cd.budgetPct[last].toFixed(1) + '%' : 'N/A'}</div><span class="badge neu">of ${cd.budget}</span></div>
+      `;
+    }
+
+    function renderTable(cd) {
+      const th = document.getElementById('camp-th');
+      const tb = document.getElementById('camp-tb');
+      const weeks = cd.weeks;
+      const last = weeks.length - 1;
+      if (!th || !tb) return;
+
+      const metrics = ['BL Approved', 'Cost/BL (₹)', 'Spend (₹K)', 'CTR (%)', 'Avg CPC (₹)', 'Conv.', 'Cost/Conv (₹)', 'Txn %', 'PMCAT Cov%'];
+      const rows = [cd.bl, cd.costBL, cd.spend.map(v => v.toFixed(1)), cd.ctr.map(v => v.toFixed(2)), cd.cpc.map(v => v.toFixed(2)), cd.conv.map(v => Math.round(v).toLocaleString()), cd.costConv.map(v => v.toFixed(1)), cd.txnPct.map(v => v.toFixed(1)), cd.pmcatCov.map(v => v != null ? v.toFixed(1) + '%' : '—')];
+      
+      th.innerHTML = '<th>Metric</th>' + weeks.map((w, i) => `<th class="num" style="${i === last ? 'color:var(--teal)' : ''}">${w}</th>`).join('');
+      tb.innerHTML = '';
+      metrics.forEach((m, ri) => { 
+        const tr = document.createElement('tr'); 
+        tr.innerHTML = `<td style="color:var(--muted);font-size:11.5px;font-weight:600">${m}</td>` + rows[ri].map((v, wi) => `<td class="num" style="${wi === last ? 'color:var(--teal);font-weight:700' : ''}">${v}</td>`).join(''); 
+        tb.appendChild(tr); 
+      });
+    }
+
+    function updateWeeklyCharts(cd) {
+      const w = cd.weeks;
+      const last = w.length - 1;
+      const fv = document.getElementById('camp-filter').value;
 
       if (fv === 'all') {
-        // All main charts
-        mk('c-cp-bl', 'line', weeks, [L('BL', cd.bl, cd.color, true), { ...L('Best Ever', Array(weeks.length).fill(cd.blBest), '#ff6168'), borderDash: [6, 3], borderWidth: 1.5, pointRadius: 0 }]);
-        mk('c-cp-costbl', 'line', weeks, [{ ...L('₹/BL', cd.costBL, '#ffb547'), fill: false }]);
-        mk('c-cp-spend', 'bar', weeks, [B('₹K', cd.spend, '#4d9fff')]);
-        mk('c-cp-impc', 'line', weeks, [L('Imp(M)', cd.impr, '#4d9fff', true), L('Clk(K)', cd.clicks, '#00cba4', false)]);
-        mk('c-cp-ctr', 'line', weeks, [{ ...L('CTR%', cd.ctr, '#3dd68c', false) }]);
-        mk('c-cp-cpc', 'line', weeks, [{ ...L('CPC(₹)', cd.cpc, '#ffb547', false) }]);
-        mk('c-cp-conv', 'bar', weeks, [B('Conv', cd.conv.map(v => Math.round(v)), cd.color)]);
-        mk('c-cp-costconv', 'line', weeks, [{ ...L('₹/Conv', cd.costConv, '#ff6168', false) }]);
-        mk('c-cp-txnpct', 'line', weeks, [{ ...L('Txn%', cd.txnPct, '#a78bfa', false) }]);
-        const budgets = cd.budgetPct.filter(v => v != null); const bw = weeks.filter((_, i) => cd.budgetPct[i] != null);
-        if (budgets.length) mk('c-cp-budget', 'bar', bw, [B('Budget%', budgets, cd.color)]);
-        // Table
-        const th = document.getElementById('camp-th');
-        const tb = document.getElementById('camp-tb');
-        if (th && tb) {
-          const metrics = ['BL Approved', 'Cost/BL (₹)', 'Spend (₹K)', 'CTR (%)', 'Avg CPC (₹)', 'Conv.', 'Cost/Conv (₹)', 'Txn %', 'PMCAT Cov%'];
-          const rows = [cd.bl, cd.costBL, cd.spend.map(v => v.toFixed(1)), cd.ctr.map(v => v.toFixed(2)), cd.cpc.map(v => v.toFixed(2)), cd.conv.map(v => Math.round(v).toLocaleString()), cd.costConv.map(v => v.toFixed(1)), cd.txnPct.map(v => v.toFixed(1)), cd.pmcatCov.map(v => v != null ? v.toFixed(1) + '%' : '—')];
-          th.innerHTML = '<th>Metric</th>' + weeks.map((w, i) => `<th class="num" style="${i === last ? 'color:var(--teal)' : ''}">${w}</th>`).join('');
-          tb.innerHTML = '';
-          metrics.forEach((m, ri) => { const tr = document.createElement('tr'); tr.innerHTML = `<td style="color:var(--muted);font-size:11.5px;font-weight:600">${m}</td>` + rows[ri].map((v, wi) => `<td class="num" style="${wi === last ? 'color:var(--teal);font-weight:700' : ''}">${v}</td>`).join(''); tb.appendChild(tr); });
+        line('c-cp-bl', w, [ds('BL', cd.bl, cd.color, true), { ...ds('Best Ever', Array(w.length).fill(cd.blBest), '#ff6168'), borderDash: [6, 3], borderWidth: 1.5, pointRadius: 0 }]);
+        line('c-cp-costbl', w, [{ ...ds('₹/BL', cd.costBL, '#ffb547', false) }]);
+        bar('c-cp-spend', w, [db('₹K', cd.spend, '#4d9fff')]);
+        line('c-cp-impc', w, [ds('Imp(M)', cd.impr, '#4d9fff', true), ds('Clk(K)', cd.clicks, '#00cba4', false)]);
+        line('c-cp-ctr', w, [{ ...ds('CTR%', cd.ctr, '#3dd68c', false) }]);
+        line('c-cp-cpc', w, [{ ...ds('CPC(₹)', cd.cpc, '#ffb547', false) }]);
+        bar('c-cp-conv', w, [db('Conv', cd.conv.map(v => Math.round(v)), cd.color)]);
+        line('c-cp-costconv', w, [{ ...ds('₹/Conv', cd.costConv, '#ff6168', false) }]);
+        line('c-cp-txnpct', w, [{ ...ds('Txn%', cd.txnPct, '#a78bfa', false) }]);
+        
+        const budgets = cd.budgetPct.filter(v => v != null);
+        if (budgets.length) {
+          const bw = w.filter((_, i) => cd.budgetPct[i] != null);
+          bar('c-cp-budget', bw, [db('Budget%', budgets, cd.color)]);
         }
       } else {
-        // MCAT / PMCAT filter views
-        mk('c-cp-clicks', 'bar', ['0 Clicks', '1–10 Clicks', '>10 Clicks'], [{ data: [cd.clicks0[last] || 0, cd.clicks110[last] || 0, cd.clicks10p[last] || 0], backgroundColor: ['#ff616888', '#ffb54788', '#3dd68c88'], borderRadius: 5, borderSkipped: false }]);
-        mk('c-cp-prods', 'bar', weeks, [B('Products', cd.prods.map(v => v || 0), cd.color)]);
-        if (fv === 'pmcat') {
-          mk('c-cp-pmcat-bkt', 'bar', cd.pmcatBkt.labels, [{ data: cd.pmcatBkt.latest.map(v => v || 0), backgroundColor: ['#ff616888', '#ffb54788', '#4d9fff88', '#00cba488', '#3dd68c88', '#a78bfa88'], borderRadius: 4, borderSkipped: false }]);
-          const pmv = weeks.filter((_, i) => cd.pmcatCov[i] != null); const pmd = cd.pmcatCov.filter(v => v != null);
-          if (pmv.length) mk('c-cp-pmcat', 'line', pmv, [L('PMCAT Cov%', pmd, '#4d9fff', true), { ...L('Target 80%', Array(pmv.length).fill(80), '#ff6168'), borderDash: [5, 3], borderWidth: 1.5, pointRadius: 0 }]);
-        } else {
-          mk('c-cp-pmcat-bkt', 'bar', cd.pmcatBkt.labels, [{ data: cd.pmcatBkt.latest.map(v => v || 0), backgroundColor: ['#ff616888', '#ffb54788', '#4d9fff88', '#00cba488', '#3dd68c88', '#a78bfa88'], borderRadius: 4, borderSkipped: false }]);
-          mk('c-cp-pmcat', 'line', weeks.filter((_, i) => cd.pmcatCov[i] != null), [L('PMCAT Cov%', cd.pmcatCov.filter(v => v != null), '#4d9fff', true)]);
+        bar('c-cp-clicks', ['0 Clicks', '1–10 Clicks', '>10 Clicks'], [{ data: [cd.clicks0[last] || 0, cd.clicks110[last] || 0, cd.clicks10p[last] || 0], backgroundColor: ['#ff616888', '#ffb54788', '#3dd68c88'], borderRadius: 5, borderSkipped: false }]);
+        bar('c-cp-prods', w, [db('Products', cd.prods.map(v => v || 0), cd.color)]);
+        bar('c-cp-pmcat-bkt', cd.pmcatBkt.labels, [{ data: cd.pmcatBkt.latest.map(v => v || 0), backgroundColor: ['#ff616888', '#ffb54788', '#4d9fff88', '#00cba488', '#3dd68c88', '#a78bfa88'], borderRadius: 4, borderSkipped: false }]);
+        
+        if (cd.pmcatCov) {
+          const pmv = w.filter((_, i) => cd.pmcatCov[i] != null);
+          const pmd = cd.pmcatCov.filter(v => v != null);
+          if (pmv.length) line('c-cp-pmcat', pmv, [ds('PMCAT Cov%', pmd, '#4d9fff', true), { ...ds('Target 80%', Array(pmv.length).fill(80), '#ff6168'), borderDash: [5, 3], borderWidth: 1.5, pointRadius: 0 }]);
         }
       }
+    }
+
+    function openMcatModal(range) {
+      const modal = document.getElementById('mcat-modal');
+      const title = document.getElementById('modal-title');
+      const tbody = document.getElementById('modal-tbody');
+      if (!modal || !tbody) return;
+
+      title.textContent = `MCAT List: ${range}`;
+      modal.classList.add('show');
+      
+      let min=0, max=999;
+      if (range === '40-50 BL') { min=40; max=50; }
+      else if (range === '50-60 BL') { min=50; max=60; }
+      else if (range === '60-75 BL') { min=60; max=75; }
+      else if (range === '75-100 BL') { min=75; max=100; }
+      else if (range === '100+ BL') { min=100; max=9999; }
+      
+      const filtered = PAUSED_LONG.filter(m => m.bl >= min && m.bl < max);
+      tbody.innerHTML = filtered.map(m => `<tr><td>${m.name}</td><td>${m.group}</td><td class="num hi">${m.bl}</td></tr>`).join('');
+      if (!filtered.length) tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--muted)">No data available for this range</td></tr>';
+    }
+
+    function closeMcatModal() {
+      const m = document.getElementById('mcat-modal');
+      if (m) m.classList.remove('show');
     }
 
     // ══════════════════════════════════════════════════════════════════════
