@@ -134,6 +134,12 @@
       color: var(--txt)
     }
 
+    .rank-list { margin-top: 10px; }
+    .rank-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--bdr2); font-size: 13px; }
+    .rank-item:last-child { border-bottom: none; }
+    .hygiene-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .action-header .pf-btn { padding: 4px 12px; font-size: 12px; }
+
     .nb.on {
       background: var(--tdim);
       color: var(--teal)
@@ -1125,6 +1131,110 @@
               <div class="cw" style="height:190px"><canvas id="c-txn"></canvas></div>
             </div>
           </div>
+
+          <!-- New Sections from index1.html -->
+          <div class="sh">
+            <h2>🧠 Action Center — Smart Insights <span id="ov-insight-count" class="badge red">0</span></h2>
+          </div>
+          <div class="cc" style="padding:0">
+            <div class="action-header" style="padding:15px 20px; border-bottom:1px solid var(--bdr2); display:flex; justify-content:space-between; align-items:center;">
+              <div class="action-filters" style="display:flex; gap:8px;">
+                <button class="pf-btn on" onclick="filterOvInsights('all', this)">All</button>
+                <button class="pf-btn" onclick="filterOvInsights('critical', this)">🚨 Critical</button>
+                <button class="pf-btn" onclick="filterOvInsights('opportunity', this)">📈 Opportunity</button>
+                <button class="pf-btn" onclick="filterOvInsights('hygiene', this)">🧼 Hygiene</button>
+              </div>
+            </div>
+            <div id="ov-insights-list" style="max-height:400px; overflow-y:auto; padding:10px"></div>
+          </div>
+
+          <div class="sh">
+            <h2>Spend & Conversion Trends</h2>
+          </div>
+          <div class="cg">
+            <div class="cc w">
+              <div class="ct">Daily Spend vs Conversions (30d)</div>
+              <div class="cs">Trend analysis from Shopping data</div>
+              <div class="cw" style="height:250px"><canvas id="c-spendConv"></canvas></div>
+            </div>
+            <div class="cc">
+              <div class="ct">CTR vs Conv Rate (Bubble Chart)</div>
+              <div class="cs">MCAT performance scatter</div>
+              <div class="cw" style="height:250px"><canvas id="c-ctrConv"></canvas></div>
+            </div>
+          </div>
+
+          <div class="sh">
+            <h2>MCAT Performance & Health</h2>
+          </div>
+          <div class="cg" style="grid-template-columns: 2fr 1fr 1fr;">
+            <div class="cc" style="padding:0">
+              <div class="ct" style="padding:15px 20px">📋 MCAT Spend & Revenue Table</div>
+              <div class="tw">
+                <table class="dt" id="ov-mcat-table">
+                  <thead>
+                    <tr>
+                      <th>MCAT Name</th>
+                      <th>Spend</th>
+                      <th>Revenue</th>
+                      <th>ROAS</th>
+                      <th>Conv</th>
+                      <th>CTR</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ov-mcat-body"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="cc">
+              <div class="ct">🏆 Top Performers</div>
+              <div class="cs">Highest ROAS categories</div>
+              <div id="top-mcats-list" class="rank-list" style="margin-top:15px"></div>
+            </div>
+            <div class="cc">
+              <div class="ct">⚠️ Underperformers</div>
+              <div class="cs">Action required (Low ROAS)</div>
+              <div id="worst-mcats-list" class="rank-list" style="margin-top:15px"></div>
+            </div>
+          </div>
+
+          <div class="sh">
+            <h2>Campaign Stability & Hygiene</h2>
+          </div>
+          <div class="cg">
+            <div class="cc w">
+              <div class="ct">MCAT Pause/Unpause Instability</div>
+              <div class="cs">High risk of "Learning Phase" reset</div>
+              <div class="tw">
+                <table class="dt">
+                  <thead>
+                    <tr>
+                      <th>MCAT</th>
+                      <th>Paused</th>
+                      <th>Unpaused</th>
+                      <th>Max Gap</th>
+                      <th>Risk Score</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ov-instability-body"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="cc">
+              <div class="ct">Feed Hygiene Scorecard</div>
+              <div class="cs">Critical errors impacting visibility</div>
+              <div id="ov-hygiene-grid" class="hygiene-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px"></div>
+              <div class="cw" style="height:220px; margin-top:15px"><canvas id="c-hygieneRadar"></canvas></div>
+            </div>
+          </div>
+
+          <div class="sh">
+            <h2>MCAT Comparison</h2>
+          </div>
+          <div class="cc">
+            <div class="ct">MCAT Spend vs Revenue comparison</div>
+            <div class="cw" style="height:280px"><canvas id="c-mcatBar"></canvas></div>
+          </div>
         </div>
       </div>
 
@@ -1433,6 +1543,15 @@
                 <option value="all">All MCATs</option>
               </select>
             </div>
+            <div style="display:flex;align-items:center;gap:7px">
+              <label>View Focus</label>
+              <select id="camp-filter" onchange="applyFilter()" style="min-width:140px">
+                <option value="all">Campaign Overview</option>
+                <option value="pmcat">PMCAT Focus</option>
+                <option value="mcat">MCAT Focus</option>
+              </select>
+            </div>
+            <div id="filter-badge" class="filter-pill" style="display:none"></div>
             <div style="margin-left:auto;font-size:12px;color:var(--muted)">Showing: <strong id="period-label"
                 style="color:var(--teal)">Weekly</strong></div>
           </div>
@@ -2336,6 +2455,9 @@
         line('c-costbl', M12, [{ ...ds('₹/BL', MN.costBL, C.a, false) }]);
         donut('c-bltype', ['WhatsApp', 'INTENT', 'FLPNS', 'Direct'], [245739, 134468, 106191, 105584], [C.t, C.b, C.p, C.a]);
         line('c-txn', M12, [ds('BL(K)', MN.bl.map(v => +(v / 1000).toFixed(0)), C.t), ds('Txn(L)', MN.txn, C.b)]);
+
+        // New Sections Initialization
+        initOverviewExtra();
       }
       if (id === 'google') {
         line('c-imp-clk', M12, [ds('Imp÷10M', MN.impr, C.b), ds('Clk÷1M', MN.clicks, C.t)]);
@@ -2586,6 +2708,7 @@
 
     function applyFilter() {
       const fv = document.getElementById('camp-filter').value;
+      const badge = document.getElementById('filter-badge');
       const isDaily = document.getElementById('pf-daily').classList.contains('on');
       
       const prefix = isDaily ? 'daily-' : '';
@@ -2593,9 +2716,13 @@
       const mc = document.getElementById(prefix + 'main-charts');
       
       if (fv === 'all') {
+        badge.style.display = 'none';
         if (fp) fp.style.display = 'none';
         if (mc) mc.style.display = 'block';
       } else {
+        badge.style.display = 'inline-flex';
+        badge.textContent = fv === 'mcat' ? '🔍 MCAT Focus' : '🔍 PMCAT Focus';
+        
         if (fp) fp.style.display = 'block';
         if (mc) mc.style.display = 'none';
         
@@ -2835,7 +2962,21 @@ Each object: type, title(7-10 words with number), detail(2-3 sentences). Return 
         'pm4': { name: 'Engineering Tools', mcats: { 'm9': 'Lathe Machines', 'm10': 'CNC Machines' } }
       },
       'ind_pm': {
-        'pm5': { name: 'Food Processing', mcats: { 'm11': 'Grain Dryers', 'm12': 'Oil Mill Machinery' } }
+        'pm5': { name: 'Food Processing', mcats: { 'm11': 'Grain Dryers', 'm12': 'Oil Mill Machinery' } },
+        'pm6': { name: 'Packaging Machinery', mcats: { 'm13': 'Pouch Packing', 'm14': 'Liquid Filling' } }
+      },
+      'mech': {
+        'pm7': { name: 'Bearings & Seals', mcats: { 'm15': 'Ball Bearings', 'm16': 'Mechanical Seals' } },
+        'pm8': { name: 'Fasteners', mcats: { 'm17': 'Stainless Steel Bolts', 'm18': 'Industrial Screws' } }
+      },
+      'packaging': {
+        'pm9': { name: 'Wrapping Machines', mcats: { 'm19': 'Stretch Wrap', 'm20': 'Shrink Wrap' } }
+      },
+      'tools': {
+        'pm10': { name: 'Power Tools', mcats: { 'm21': 'Electric Drills', 'm22': 'Angle Grinders' } }
+      },
+      'kitchen': {
+        'pm11': { name: 'Cookware', mcats: { 'm23': 'Pressure Cookers', 'm24': 'Non-stick Pans' } }
       }
     };
 
@@ -2869,6 +3010,18 @@ Each object: type, title(7-10 words with number), detail(2-3 sentences). Return 
       
       // Determine which data to load based on active period
       const isDaily = document.getElementById('pf-daily').classList.contains('on');
+      
+      // Auto-switch View Focus based on selection depth
+      const campFilter = document.getElementById('camp-filter');
+      if (mcat !== 'all') {
+        campFilter.value = 'mcat';
+      } else if (pmcat !== 'all') {
+        campFilter.value = 'pmcat';
+      } else {
+        campFilter.value = 'all';
+      }
+      applyFilter();
+
       if (isDaily) {
         fetchDailyRedshiftData();
       } else {
@@ -3005,6 +3158,168 @@ Each object: type, title(7-10 words with number), detail(2-3 sentences). Return 
       mk('daily-c-cp-impc', 'line', days, [L('Imp(M)', [0.5, 0.8, 1.5, 2.2, 3.1, 4.0, 4.5], '#4d9fff', true), L('Clk(K)', [10, 18, 35, 52, 70, 88, 98], '#00cba4')]);
       mk('daily-c-cp-ctr', 'line', days, [L('CTR%', [2.1, 2.3, 2.4, 2.5, 2.6, 2.6, 2.6], '#3dd68c')]);
       mk('daily-c-cp-cpc', 'line', days, [L('CPC(₹)', [1.8, 1.7, 1.7, 1.7, 1.6, 1.6, 1.6], '#ffb547')]);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // OVERVIEW EXTRA SECTIONS (MIGRATED FROM index1.html)
+    // ══════════════════════════════════════════════════════════════════════
+    let ovInsights = [];
+    let ovFilter = 'all';
+
+    function initOverviewExtra() {
+      // Data Mock for new sections
+      const MOCK_MCATS = [
+        { name: 'Outdoor Furniture', spend: 45000, rev: 185000, conv: 120, ctr: 2.8, status: 'active' },
+        { name: 'Concrete Mixers', spend: 32000, rev: 98000, conv: 85, ctr: 1.9, status: 'active' },
+        { name: 'Diesel Generator', spend: 58000, rev: 62000, conv: 42, ctr: 1.2, status: 'paused' },
+        { name: 'Cotton Tote Bags', spend: 12000, rev: 55000, conv: 210, ctr: 4.5, status: 'active' },
+        { name: 'CNC Routers', spend: 85000, rev: 210000, conv: 35, ctr: 0.8, status: 'active' }
+      ];
+
+      // 1. Spend & Conv Chart
+      const dates = ["Apr 1", "Apr 5", "Apr 10", "Apr 15", "Apr 20", "Apr 25", "Apr 30"];
+      const dailySpend = [45, 52, 48, 61, 55, 70, 85];
+      const dailyConv = [12, 15, 14, 22, 19, 25, 30];
+      
+      mkChart('c-spendConv', 'bar', dates, [
+        { label: 'Spend (₹K)', data: dailySpend, backgroundColor: C.b + '44', borderColor: C.b, borderWidth: 1 },
+        { label: 'Conversions', data: dailyConv, type: 'line', borderColor: C.g, tension: 0.4, yAxisID: 'y1' }
+      ], { scales: { ...base().scales, y1: { position: 'right', grid: { display: false }, title: { display: true, text: 'Conversions' } } } });
+
+      // 2. Scatter/Bubble
+      mkChart('c-ctrConv', 'bubble', [], [{
+        label: 'MCATs',
+        data: MOCK_MCATS.map(m => ({ x: m.ctr, y: (m.conv/m.spend*1000), r: (m.spend/5000) })),
+        backgroundColor: C.t + '88', borderColor: C.t
+      }], { scales: { x: { title: { display: true, text: 'CTR %' } }, y: { title: { display: true, text: 'Conv Efficiency' } } } });
+
+      // 3. Insight Engine
+      ovInsights = [
+        { type: 'critical', title: 'High Budget Leakage in Furniture', desc: 'Outdoor Furniture spend increased 40% but ROAS fell to 0.8x. Immediate bid reduction advised.', severity: 'critical' },
+        { type: 'opportunity', title: 'Scale PMCAT: Cotton Bags', desc: 'Exceptional 4.5x ROAS with low spend. Increase budget by ₹10K/day.', severity: 'high' },
+        { type: 'hygiene', title: 'Feed Error: Missing Images', desc: '12% of B&C products lack high-res images, dropping CTR by 0.5pp.', severity: 'medium' }
+      ];
+      renderOvInsights();
+
+      // 4. MCAT Tables
+      renderOvMcatTable(MOCK_MCATS);
+
+      // 5. Instability
+      renderOvInstability();
+
+      // 6. Hygiene Scorecard
+      renderOvHygiene();
+
+      // 7. MCAT Bar Chart
+      mkChart('c-mcatBar', 'bar', MOCK_MCATS.map(m => m.name), [
+        db('Spend', MOCK_MCATS.map(m => m.spend), C.b),
+        db('Revenue', MOCK_MCATS.map(m => m.rev), C.t)
+      ]);
+
+      // 8. Hygiene Radar
+      const hData = [88, 82, 95, 78, 92, 96]; // Mock scores
+      const ctxR = document.getElementById('c-hygieneRadar');
+      if (ctxR) {
+        if (ctxR._chart) ctxR._chart.destroy();
+        ctxR._chart = new Chart(ctxR, {
+          type: 'radar',
+          data: {
+            labels: ['Labels', 'Match', 'Active', 'Images', 'Pricing', 'Approved'],
+            datasets: [{ label: 'Score', data: hData, backgroundColor: C.b + '33', borderColor: C.b, borderWidth: 2, pointBackgroundColor: C.b }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { r: { grid: { color: 'rgba(255,255,255,0.1)' }, angleLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { display: false }, pointLabels: { color: '#7a90a8', font: { size: 10 } } } } }
+        });
+      }
+    }
+
+    function renderOvInsights() {
+      const list = document.getElementById('ov-insights-list');
+      const filtered = ovFilter === 'all' ? ovInsights : ovInsights.filter(i => i.type === ovFilter);
+      document.getElementById('ov-insight-count').textContent = filtered.length;
+      list.innerHTML = filtered.map(i => `
+        <div style="padding:12px; border-bottom:1px solid var(--bdr2); margin-bottom:8px; background:rgba(255,255,255,0.02); border-radius:8px">
+          <div style="display:flex; justify-content:space-between; align-items:start">
+            <strong style="color:${i.type === 'critical' ? 'var(--red)' : i.type === 'opportunity' ? 'var(--green)' : 'var(--blue)'}">${i.title}</strong>
+            <span class="badge ${i.severity}">${i.severity}</span>
+          </div>
+          <div style="font-size:12px; color:var(--muted); margin-top:5px">${i.desc}</div>
+        </div>
+      `).join('');
+    }
+
+    function filterOvInsights(type, btn) {
+      ovFilter = type;
+      btn.parentElement.querySelectorAll('.pf-btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      renderOvInsights();
+    }
+
+    function renderOvMcatTable(data) {
+      const body = document.getElementById('ov-mcat-body');
+      body.innerHTML = data.map(m => `
+        <tr>
+          <td>${m.name}</td>
+          <td class="num">₹${m.spend.toLocaleString()}</td>
+          <td class="num">₹${m.rev.toLocaleString()}</td>
+          <td class="num" style="color:${(m.rev/m.spend) > 3 ? 'var(--green)' : 'var(--red)'}">${(m.rev/m.spend).toFixed(2)}x</td>
+          <td class="num">${m.conv}</td>
+          <td class="num">${m.ctr}%</td>
+        </tr>
+      `).join('');
+
+      // Top/Worst Lists
+      const sorted = [...data].sort((a,b) => (b.rev/b.spend) - (a.rev/a.spend));
+      document.getElementById('top-mcats-list').innerHTML = sorted.slice(0,3).map((m,i) => `
+        <div class="rank-item">
+          <span>${i+1}. ${m.name}</span>
+          <span style="color:var(--green)">${(m.rev/m.spend).toFixed(1)}x</span>
+        </div>
+      `).join('');
+      document.getElementById('worst-mcats-list').innerHTML = sorted.slice(-3).reverse().map((m,i) => `
+        <div class="rank-item">
+          <span>${i+1}. ${m.name}</span>
+          <span style="color:var(--red)">${(m.rev/m.spend).toFixed(1)}x</span>
+        </div>
+      `).join('');
+    }
+
+    function renderOvInstability() {
+      const items = [
+        { name: 'Kirloskar Generator', p: 5, u: 4, gap: '5d', score: 82 },
+        { name: 'Concrete Mixers', p: 3, u: 3, gap: '2d', score: 45 },
+        { name: 'UPVC Windows', p: 8, u: 7, gap: '1d', score: 91 }
+      ];
+      document.getElementById('ov-instability-body').innerHTML = items.map(i => `
+        <tr>
+          <td>${i.name}</td>
+          <td class="num">${i.p}</td>
+          <td class="num">${i.u}</td>
+          <td class="num">${i.gap}</td>
+          <td>
+            <div style="display:flex; align-items:center; gap:8px">
+              <div style="flex:1; height:4px; background:var(--bdr2); border-radius:2px; overflow:hidden">
+                <div style="width:${i.score}%; height:100%; background:${i.score > 70 ? 'var(--red)' : 'var(--green)'}"></div>
+              </div>
+              <span style="font-size:11px">${i.score}</span>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderOvHygiene() {
+      const items = [
+        { lbl: 'Missing Labels', val: 12, th: 10 },
+        { lbl: 'Inactive Prods', val: 18, th: 15 },
+        { lbl: 'Price Mismatch', val: 2, th: 5 },
+        { lbl: 'Feed Quality', val: 88, th: 90, type: 'health' }
+      ];
+      document.getElementById('ov-hygiene-grid').innerHTML = items.map(i => `
+        <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid var(--bdr2)">
+          <div style="font-size:10px; color:var(--muted); text-transform:uppercase">${i.lbl}</div>
+          <div style="font-size:18px; font-weight:700; color:${i.val > i.th && !i.type ? 'var(--red)' : 'var(--green)'}">${i.val}%</div>
+        </div>
+      `).join('');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
