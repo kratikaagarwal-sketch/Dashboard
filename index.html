@@ -1815,11 +1815,6 @@
             <!-- Campaign banner -->
             <div id="camp-banner" class="banner" style="margin-bottom:18px"></div>
 
-            <!-- ★ TOP 5 DELTAS ★ -->
-            <div class="sh">
-              <h2>Top 5 Week-on-Week Deltas <span id="delta-sub">Latest vs prior week</span></h2>
-            </div>
-            <div class="delta-grid" id="camp-deltas"></div>
 
             <!-- KPI cards -->
             <div class="sh">
@@ -3001,7 +2996,6 @@
         <div><div class="bn-val" style="color:${isDown ? 'var(--red)' : 'var(--green)'}">${cd.delta.bl}</div><div class="bn-lbl">BL vs LW</div></div>
         <div><div class="bn-val" style="color:var(--teal)">${cd.blBest.toLocaleString()}</div><div class="bn-lbl">Best Ever BL</div></div>
       </div>`;
-        renderDeltas(cd);
         renderKPIs(cd);
         document.getElementById('tbl-sub').textContent = `${cd.name} — all metrics by week`;
         document.getElementById('ai-camp-sub').textContent = `${cd.name} — ${cd.latestWeek}`;
